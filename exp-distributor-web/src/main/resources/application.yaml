@@ -1,0 +1,68 @@
+spring:
+  application:
+    name: exp-distributor
+    version: 1.0.0
+    description: Experience layer API for distributor management journeys
+    team:
+      name: Firefly Software Solutions Inc
+      email: dev@getfirefly.io
+  threads:
+    virtual:
+      enabled: true
+
+server:
+  address: ${SERVER_ADDRESS:localhost}
+  port: ${SERVER_PORT:8097}
+  shutdown: graceful
+
+api-configuration:
+  domain-platform:
+    distributor-branding:
+      base-path: ${ENDPOINT_DOMAIN_DISTRIBUTOR_BRANDING:http://localhost:8080}
+    distributor-catalog:
+      base-path: ${ENDPOINT_DOMAIN_DISTRIBUTOR_CATALOG:http://localhost:8080}
+    product-catalog:
+      base-path: ${ENDPOINT_DOMAIN_PRODUCT_CATALOG:http://localhost:8080}
+    product-pricing:
+      base-path: ${ENDPOINT_DOMAIN_PRODUCT_PRICING:http://localhost:8080}
+    common-contracts:
+      base-path: ${ENDPOINT_DOMAIN_COMMON_CONTRACTS:http://localhost:8080}
+    common-notifications:
+      base-path: ${ENDPOINT_DOMAIN_COMMON_NOTIFICATIONS:http://localhost:8095}
+
+springdoc:
+  api-docs:
+    enabled: true
+    path: /v3/api-docs
+  swagger-ui:
+    path: /swagger-ui.html
+    tagsSorter: alpha
+    operationsSorter: method
+    docExpansion: none
+    filter: true
+  packages-to-scan: com.firefly.experience.distributor.web.controllers
+  paths-to-match: /api/**
+
+management:
+  endpoints:
+    web:
+      exposure:
+        include: health,info,prometheus
+  endpoint:
+    health:
+      show-details: when-authorized
+      probes:
+        enabled: true
+  health:
+    livenessState:
+      enabled: true
+    readinessState:
+      enabled: true
+
+logging:
+  pattern:
+    console: "%d{yyyy-MM-dd HH:mm:ss} [%thread] %-5level %logger{36} - %msg%n"
+  level:
+    root: INFO
+    com.firefly.experience.distributor: DEBUG
+    org.fireflyframework: DEBUG
