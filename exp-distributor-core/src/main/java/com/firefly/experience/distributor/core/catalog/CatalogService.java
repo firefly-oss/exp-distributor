@@ -14,7 +14,9 @@ public interface CatalogService {
 
     Mono<UUID> addToCatalog(UUID distributorId, AddCatalogItemRequest request);
 
-    Mono<UUID> updateCatalogItem(UUID distributorId, UUID productId, UpdateCatalogItemRequest request);
+    Mono<CatalogItemDTO> getCatalogItem(UUID distributorId, UUID catalogItemId);
 
-    Mono<UUID> removeFromCatalog(UUID distributorId, UUID productId);
+    Mono<UUID> updateCatalogItem(UUID distributorId, UUID catalogItemId, UpdateCatalogItemRequest request);
+
+    Mono<UUID> removeFromCatalog(UUID distributorId, UUID catalogItemId);
 }

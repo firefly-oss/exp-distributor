@@ -48,22 +48,31 @@ public class CatalogController {
                 .map(r -> ResponseEntity.status(HttpStatus.CREATED).body(r));
     }
 
-    @PutMapping("/{productId}")
-    @Operation(summary = "Update catalog item", description = "Update an existing catalog item")
-    public Mono<ResponseEntity<UUID>> updateCatalogItem(
+    @GetMapping("/{catalogItemId}")
+    @Operation(summary = "Get catalog item", description = "Retrieve a specific catalog item by ID")
+    public Mono<ResponseEntity<CatalogItemDTO>> getCatalogItem(
             @PathVariable UUID distributorId,
-            @PathVariable UUID productId,
-            @Valid @RequestBody UpdateCatalogItemRequest request) {
-        return catalogService.updateCatalogItem(distributorId, productId, request)
+            @PathVariable UUID catalogItemId) {
+        return catalogService.getCatalogItem(distributorId, catalogItemId)
                 .map(ResponseEntity::ok);
     }
 
-    @DeleteMapping("/{productId}")
-    @Operation(summary = "Remove from catalog", description = "Remove an item from the distributor's catalog")
-    public Mono<ResponseEntity<UUID>> removeFromCatalog(
+    @PutMapping("/{catalogItemId}")
+    @Operation(summary = "Update catalog item", description = "Update an existing catalog item")
+    public Mono<ResponseEntity<UUID>> updateCatalogItem(
             @PathVariable UUID distributorId,
-            @PathVariable UUID productId) {
-        return catalogService.removeFromCatalog(distributorId, productId)
+            @PathVariable UUID catalogItemId,
+            @Valid @RequestBody UpdateCatalogItemRequest request) {
+        return catalogService.updateCatalogItem(distributorId, catalogItemId, request)
                 .map(ResponseEntity::ok);
+    }
+
+    @DeleteMapping("/{catalogItemId}")
+    @Operation(summary = "Remove from catalog", description = "Remove an item from the distributor's catalog")
+    public Mono<ResponseEntity<Void>> removeFromCatalog(
+            @PathVariable UUID distributorId,
+            @PathVariable UUID catalogItemId) {
+        return catalogService.removeFromCatalog(distributorId, catalogItemId)
+                .then(Mono.just(ResponseEntity.<Void>noContent().build()));
     }
 }

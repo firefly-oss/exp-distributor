@@ -29,6 +29,8 @@ public class AgencyServiceImpl implements AgencyService {
 
         CreateAgencyCommand command = agencyMapper.toCreateCommand(request);
 
+        // ARCH-EXCEPTION: domain-distributor-branding-sdk generated client does not expose an
+        // xIdempotencyKey parameter on createAgency; idempotency cannot be set at call-site.
         return agencyApi.createAgency(distributorId, command);
     }
 
@@ -51,6 +53,8 @@ public class AgencyServiceImpl implements AgencyService {
 
         UpdateAgencyCommand command = agencyMapper.toUpdateCommand(request);
 
+        // ARCH-EXCEPTION: domain-distributor-branding-sdk generated client does not expose an
+        // xIdempotencyKey parameter on updateAgency; idempotency cannot be set at call-site.
         return agencyApi.updateAgency(distributorId, agencyId, command);
     }
 

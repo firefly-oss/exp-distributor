@@ -32,6 +32,8 @@ public class AgentAgencyServiceImpl implements AgentAgencyService {
     public Mono<AgentAgencyDTO> assignAgentToAgency(UUID distributorId, AssignAgentRequest request) {
         AssignAgentAgencyCommand command = agentAgencyMapper.toCommand(request);
 
+        // ARCH-EXCEPTION: domain-distributor-branding-sdk generated client does not expose an
+        // xIdempotencyKey parameter on assignAgentAgency; idempotency cannot be set at call-site.
         return agentAgencyApi.assignAgentAgency(distributorId, command)
                 .map(id -> AgentAgencyDTO.builder()
                         .id(id)

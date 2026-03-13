@@ -35,6 +35,8 @@ public class OperationsServiceImpl implements OperationsService {
     public Mono<OperationDTO> createOperation(UUID distributorId, CreateOperationRequest request) {
         log.info("Creating operation for distributor: {}", distributorId);
         CreateOperationCommand command = operationMapper.toCreateCommand(request);
+        // ARCH-EXCEPTION: domain-distributor-branding-sdk generated client does not expose an
+        // xIdempotencyKey parameter on createOperation; idempotency cannot be set at call-site.
         return operationApi.createOperation(distributorId, command)
                 .flatMap(operationId -> operationApi.getOperation(distributorId, operationId))
                 .map(operationMapper::toDto);
@@ -44,6 +46,8 @@ public class OperationsServiceImpl implements OperationsService {
     public Mono<OperationDTO> updateOperation(UUID distributorId, UUID operationId, UpdateOperationRequest request) {
         log.info("Updating operation {} for distributor: {}", operationId, distributorId);
         UpdateOperationCommand command = operationMapper.toUpdateCommand(request);
+        // ARCH-EXCEPTION: domain-distributor-branding-sdk generated client does not expose an
+        // xIdempotencyKey parameter on updateOperation; idempotency cannot be set at call-site.
         return operationApi.updateOperation(distributorId, operationId, command)
                 .flatMap(updatedId -> operationApi.getOperation(distributorId, updatedId))
                 .map(operationMapper::toDto);

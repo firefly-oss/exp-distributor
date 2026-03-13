@@ -68,6 +68,10 @@
         </dependency>
         <dependency>
             <groupId>com.firefly</groupId>
+            <artifactId>core-common-distributor-mgmt-sdk</artifactId>
+        </dependency>
+        <dependency>
+            <groupId>com.firefly</groupId>
             <artifactId>domain-distributor-catalog-sdk</artifactId>
         </dependency>
         <dependency>

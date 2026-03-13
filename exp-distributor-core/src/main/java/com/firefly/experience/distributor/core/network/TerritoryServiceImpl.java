@@ -29,6 +29,8 @@ public class TerritoryServiceImpl implements TerritoryService {
 
         CreateTerritoryCommand command = territoryMapper.toCreateCommand(request);
 
+        // ARCH-EXCEPTION: domain-distributor-branding-sdk generated client does not expose an
+        // xIdempotencyKey parameter on createTerritory; idempotency cannot be set at call-site.
         return territoryApi.createTerritory(distributorId, command);
     }
 
@@ -51,6 +53,8 @@ public class TerritoryServiceImpl implements TerritoryService {
 
         UpdateTerritoryCommand command = territoryMapper.toUpdateCommand(request);
 
+        // ARCH-EXCEPTION: domain-distributor-branding-sdk generated client does not expose an
+        // xIdempotencyKey parameter on updateTerritory; idempotency cannot be set at call-site.
         return territoryApi.updateTerritory(distributorId, territoryId, command);
     }
 

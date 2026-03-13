@@ -12,4 +12,8 @@ public interface ProductMapper {
     @Mapping(target = "name", source = "productName")
     @Mapping(target = "description", source = "productDescription")
     ProductDetailDTO toDto(ProductDTO sdk);
+
+    @Mapping(target = "category", ignore = true)
+    @Mapping(target = "status", ignore = true)
+    ProductDetailDTO fromCatalogDto(com.firefly.domain.distributor.catalog.sdk.model.ProductDTO sdk);
 }

@@ -38,6 +38,8 @@ public class AgentServiceImpl implements AgentService {
     public Mono<AgentDTO> createAgent(UUID distributorId, CreateAgentRequest request) {
         CreateAgentCommand command = agentMapper.toCreateCommand(request);
 
+        // ARCH-EXCEPTION: domain-distributor-branding-sdk generated client does not expose an
+        // xIdempotencyKey parameter on createAgent; idempotency cannot be set at call-site.
         return agentApi.createAgent(distributorId, command)
                 .flatMap(id -> agentApi.getAgent(distributorId, id))
                 .map(agentMapper::toDto);
@@ -53,6 +55,8 @@ public class AgentServiceImpl implements AgentService {
     public Mono<AgentDTO> updateAgent(UUID distributorId, UUID agentId, UpdateAgentRequest request) {
         UpdateAgentCommand command = agentMapper.toUpdateCommand(request);
 
+        // ARCH-EXCEPTION: domain-distributor-branding-sdk generated client does not expose an
+        // xIdempotencyKey parameter on updateAgent; idempotency cannot be set at call-site.
         return agentApi.updateAgent(distributorId, agentId, command)
                 .flatMap(id -> agentApi.getAgent(distributorId, id))
                 .map(agentMapper::toDto);

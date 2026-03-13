@@ -49,6 +49,8 @@ public class TermsAndConditionsServiceImpl implements TermsAndConditionsService 
     public Mono<TermsDTO> createTerms(UUID distributorId, CreateTermsRequest request) {
         log.info("Creating terms and conditions for distributor: {}", distributorId);
         CreateTermsAndConditionsCommand command = termsMapper.toCreateCommand(request);
+        // ARCH-EXCEPTION: domain-distributor-branding-sdk generated client does not expose an
+        // xIdempotencyKey parameter on createTermsAndConditions; idempotency cannot be set at call-site.
         return termsAndConditionsApi.createTermsAndConditions(distributorId, command)
                 .flatMap(tcId -> termsAndConditionsApi.getTermsAndConditionsDetail(distributorId, tcId))
                 .map(termsMapper::toDto);

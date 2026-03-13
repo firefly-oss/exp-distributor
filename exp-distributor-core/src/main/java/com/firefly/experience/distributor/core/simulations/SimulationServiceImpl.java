@@ -25,6 +25,8 @@ public class SimulationServiceImpl implements SimulationService {
         log.info("Creating simulation for distributor: {}", distributorId);
         CreateSimulationCommand command = simulationMapper.toCommand(request);
         command.setDistributorId(distributorId);
+        // ARCH-EXCEPTION: domain-distributor-catalog-sdk generated client does not expose an
+        // xIdempotencyKey parameter on createSimulation; idempotency cannot be set at call-site.
         return simulationsApi.createSimulation(distributorId, command);
     }
 

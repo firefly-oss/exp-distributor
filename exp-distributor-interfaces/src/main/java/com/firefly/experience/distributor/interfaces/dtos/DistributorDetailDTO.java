@@ -17,5 +17,7 @@ public class DistributorDetailDTO {
     private String name;
     private String displayName;
     private String email;
-    private Boolean isActive;
+    private String status;
+    private BrandingDTO activeBranding;
+    private Boolean hasActiveSignedTerms;
 }
