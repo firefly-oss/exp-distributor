@@ -1,6 +1,7 @@
 package com.firefly.experience.distributor.infra;
 
-import com.firefly.domain.common.contracts.sdk.api.ScaOperationsApi;
+import com.firefly.domain.common.contracts.sdk.api.ContractsApi;
+import com.firefly.domain.common.contracts.sdk.api.ContractTermsApi;
 import com.firefly.domain.common.contracts.sdk.invoker.ApiClient;
 import org.springframework.context.annotation.Bean;
 import org.springframework.stereotype.Component;
@@ -25,12 +26,22 @@ public class CommonContractsClientFactory {
     }
 
     /**
-     * Provides the {@link ScaOperationsApi} bean for Strong Customer Authentication operations.
+     * Provides the {@link ContractsApi} bean for contract operations.
      *
-     * @return a ready-to-use ScaOperationsApi instance
+     * @return a ready-to-use ContractsApi instance
      */
     @Bean
-    public ScaOperationsApi scaOperationsApi() {
-        return new ScaOperationsApi(apiClient);
+    public ContractsApi contractsApi() {
+        return new ContractsApi(apiClient);
+    }
+
+    /**
+     * Provides the {@link ContractTermsApi} bean for contract terms operations.
+     *
+     * @return a ready-to-use ContractTermsApi instance
+     */
+    @Bean
+    public ContractTermsApi contractTermsApi() {
+        return new ContractTermsApi(apiClient);
     }
 }

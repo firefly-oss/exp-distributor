@@ -26,7 +26,7 @@ public class OperationsServiceImpl implements OperationsService {
     @Override
     public Flux<OperationDTO> listOperations(UUID distributorId) {
         log.info("Listing operations for distributor: {}", distributorId);
-        return operationApi.listOperations(distributorId, UUID.randomUUID().toString())
+        return operationApi.listOperations(distributorId, null)
                 .map(operationMapper::toDto)
                 .flux();
     }
@@ -35,10 +35,8 @@ public class OperationsServiceImpl implements OperationsService {
     public Mono<OperationDTO> createOperation(UUID distributorId, CreateOperationRequest request) {
         log.info("Creating operation for distributor: {}", distributorId);
         CreateOperationCommand command = operationMapper.toCreateCommand(request);
-        // ARCH-EXCEPTION: domain-distributor-branding-sdk generated client does not expose an
-        // xIdempotencyKey parameter on createOperation; idempotency cannot be set at call-site.
         return operationApi.createOperation(distributorId, command, UUID.randomUUID().toString())
-                .flatMap(operationId -> operationApi.getOperation(distributorId, operationId, UUID.randomUUID().toString()))
+                .flatMap(operationId -> operationApi.getOperation(distributorId, operationId, null))
                 .map(operationMapper::toDto);
     }
 
@@ -46,10 +44,8 @@ public class OperationsServiceImpl implements OperationsService {
     public Mono<OperationDTO> updateOperation(UUID distributorId, UUID operationId, UpdateOperationRequest request) {
         log.info("Updating operation {} for distributor: {}", operationId, distributorId);
         UpdateOperationCommand command = operationMapper.toUpdateCommand(request);
-        // ARCH-EXCEPTION: domain-distributor-branding-sdk generated client does not expose an
-        // xIdempotencyKey parameter on updateOperation; idempotency cannot be set at call-site.
         return operationApi.updateOperation(distributorId, operationId, command, UUID.randomUUID().toString())
-                .flatMap(updatedId -> operationApi.getOperation(distributorId, updatedId, UUID.randomUUID().toString()))
+                .flatMap(updatedId -> operationApi.getOperation(distributorId, updatedId, null))
                 .map(operationMapper::toDto);
     }
 
@@ -76,6 +72,6 @@ public class OperationsServiceImpl implements OperationsService {
     @Override
     public Mono<Boolean> canOperate(UUID distributorId) {
         log.info("Checking if distributor {} can operate", distributorId);
-        return operationApi.canOperate(distributorId, distributorId, distributorId, UUID.randomUUID().toString());
+        return operationApi.canOperate(distributorId, distributorId, distributorId, null);
     }
 }

@@ -1,7 +1,7 @@
 package com.firefly.experience.distributor.core.shipments;
 
-import com.firefly.core.distributor.sdk.api.ShipmentApi;
 import com.firefly.domain.distributor.catalog.sdk.api.DistributorApi;
+import com.firefly.domain.distributor.catalog.sdk.api.ShipmentQueriesApi;
 import com.firefly.domain.distributor.catalog.sdk.model.ProductDTO;
 import com.firefly.experience.distributor.core.mappers.ShipmentMapper;
 import com.firefly.experience.distributor.interfaces.dtos.RegisterShipmentRequest;
@@ -34,7 +34,7 @@ class ShipmentServiceImplTest {
     private DistributorApi catalogDistributorApi;
 
     @Mock
-    private ShipmentApi coreShipmentApi;
+    private ShipmentQueriesApi shipmentQueriesApi;
 
     @Mock
     private ShipmentMapper shipmentMapper;
@@ -60,9 +60,10 @@ class ShipmentServiceImplTest {
         return s;
     }
 
-    private com.firefly.core.distributor.sdk.model.ShipmentDTO buildCoreShipment(UUID shipmentId) {
-        com.firefly.core.distributor.sdk.model.ShipmentDTO s =
-                new com.firefly.core.distributor.sdk.model.ShipmentDTO();
+    private com.firefly.domain.distributor.catalog.sdk.model.ShipmentDTO buildDomainShipment(UUID shipmentId) {
+        com.firefly.domain.distributor.catalog.sdk.model.ShipmentDTO s =
+                new com.firefly.domain.distributor.catalog.sdk.model.ShipmentDTO();
+        s.setId(shipmentId);
         s.setTrackingNumber("TRK-001");
         s.setCarrier("DHL");
         s.setStatus("IN_TRANSIT");
@@ -140,7 +141,7 @@ class ShipmentServiceImplTest {
 
     @Test
     @SuppressWarnings("unchecked")
-    void registerShipment_shouldCallCatalogThenReadBackFromCore() {
+    void registerShipment_shouldCallCatalogThenReadBackFromQuery() {
         UUID distributorId = UUID.randomUUID();
         UUID productId = UUID.randomUUID();
         UUID shipmentId = UUID.randomUUID();
@@ -153,14 +154,14 @@ class ShipmentServiceImplTest {
 
         com.firefly.domain.distributor.catalog.sdk.model.RegisterShipmentCommand cmd =
                 new com.firefly.domain.distributor.catalog.sdk.model.RegisterShipmentCommand();
-        com.firefly.core.distributor.sdk.model.ShipmentDTO coreShipment = buildCoreShipment(shipmentId);
+        com.firefly.domain.distributor.catalog.sdk.model.ShipmentDTO domainShipment = buildDomainShipment(shipmentId);
         ShipmentDTO expectedDto = buildExpShipmentDTO(shipmentId, distributorId);
 
         when(shipmentMapper.toCommand(request)).thenReturn(cmd);
         when(catalogDistributorApi.shipContractItem(eq(distributorId), eq(productId), any(), any()))
                 .thenReturn(Mono.just(shipmentId));
-        when(coreShipmentApi.getShipmentById(eq(shipmentId), any())).thenReturn(Mono.just(coreShipment));
-        when(shipmentMapper.toCoreDto(coreShipment)).thenReturn(expectedDto);
+        when(shipmentQueriesApi.getShipment(eq(shipmentId), any())).thenReturn(Mono.just(domainShipment));
+        when(shipmentMapper.toCatalogDto(domainShipment)).thenReturn(expectedDto);
 
         StepVerifier.create(service.registerShipment(distributorId, request))
                 .assertNext(dto -> {
@@ -170,21 +171,21 @@ class ShipmentServiceImplTest {
                 .verifyComplete();
 
         verify(catalogDistributorApi).shipContractItem(eq(distributorId), eq(productId), any(), any());
-        verify(coreShipmentApi).getShipmentById(eq(shipmentId), any());
+        verify(shipmentQueriesApi).getShipment(eq(shipmentId), any());
     }
 
     // ── getShipment ──────────────────────────────────────────────────────────
 
     @Test
-    void getShipment_shouldDelegateToCoreAndSetDistributorId() {
+    void getShipment_shouldDelegateToQueryApiAndSetDistributorId() {
         UUID distributorId = UUID.randomUUID();
         UUID shipmentId = UUID.randomUUID();
 
-        com.firefly.core.distributor.sdk.model.ShipmentDTO coreShipment = buildCoreShipment(shipmentId);
+        com.firefly.domain.distributor.catalog.sdk.model.ShipmentDTO domainShipment = buildDomainShipment(shipmentId);
         ShipmentDTO expectedDto = buildExpShipmentDTO(shipmentId, distributorId);
 
-        when(coreShipmentApi.getShipmentById(eq(shipmentId), any())).thenReturn(Mono.just(coreShipment));
-        when(shipmentMapper.toCoreDto(coreShipment)).thenReturn(expectedDto);
+        when(shipmentQueriesApi.getShipment(eq(shipmentId), any())).thenReturn(Mono.just(domainShipment));
+        when(shipmentMapper.toCatalogDto(domainShipment)).thenReturn(expectedDto);
 
         StepVerifier.create(service.getShipment(distributorId, shipmentId))
                 .assertNext(dto -> {
@@ -193,13 +194,13 @@ class ShipmentServiceImplTest {
                 })
                 .verifyComplete();
 
-        verify(coreShipmentApi).getShipmentById(eq(shipmentId), any());
+        verify(shipmentQueriesApi).getShipment(eq(shipmentId), any());
     }
 
     // ── updateShipment ───────────────────────────────────────────────────────
 
     @Test
-    void updateShipment_shouldMapRequestAndDelegateToCore() {
+    void updateShipment_shouldMapRequestAndDelegateToQueryApi() {
         UUID distributorId = UUID.randomUUID();
         UUID shipmentId = UUID.randomUUID();
 
@@ -208,14 +209,14 @@ class ShipmentServiceImplTest {
                 .carrier("FedEx")
                 .build();
 
-        com.firefly.core.distributor.sdk.model.ShipmentDTO updateCmd =
-                new com.firefly.core.distributor.sdk.model.ShipmentDTO();
-        com.firefly.core.distributor.sdk.model.ShipmentDTO coreShipment = buildCoreShipment(shipmentId);
+        com.firefly.domain.distributor.catalog.sdk.model.ShipmentDTO updateCmd =
+                new com.firefly.domain.distributor.catalog.sdk.model.ShipmentDTO();
+        com.firefly.domain.distributor.catalog.sdk.model.ShipmentDTO domainShipment = buildDomainShipment(shipmentId);
         ShipmentDTO expectedDto = buildExpShipmentDTO(shipmentId, distributorId);
 
         when(shipmentMapper.toUpdateSdkDto(request)).thenReturn(updateCmd);
-        when(coreShipmentApi.updateShipment(eq(shipmentId), eq(updateCmd), any())).thenReturn(Mono.just(coreShipment));
-        when(shipmentMapper.toCoreDto(coreShipment)).thenReturn(expectedDto);
+        when(shipmentQueriesApi.updateShipment(eq(shipmentId), eq(updateCmd), any())).thenReturn(Mono.just(domainShipment));
+        when(shipmentMapper.toCatalogDto(domainShipment)).thenReturn(expectedDto);
 
         StepVerifier.create(service.updateShipment(distributorId, shipmentId, request))
                 .assertNext(dto -> {
@@ -224,32 +225,32 @@ class ShipmentServiceImplTest {
                 })
                 .verifyComplete();
 
-        verify(coreShipmentApi).updateShipment(eq(shipmentId), any(), any());
+        verify(shipmentQueriesApi).updateShipment(eq(shipmentId), any(), any());
     }
 
     // ── deleteShipment ───────────────────────────────────────────────────────
 
     @Test
-    void deleteShipment_shouldDelegateToCoreAndCompleteEmpty() {
+    void deleteShipment_shouldDelegateToQueryApiAndCompleteEmpty() {
         UUID distributorId = UUID.randomUUID();
         UUID shipmentId = UUID.randomUUID();
 
-        when(coreShipmentApi.deleteShipment(eq(shipmentId), any())).thenReturn(Mono.empty());
+        when(shipmentQueriesApi.deleteShipment(eq(shipmentId), any())).thenReturn(Mono.empty());
 
         StepVerifier.create(service.deleteShipment(distributorId, shipmentId))
                 .verifyComplete();
 
-        verify(coreShipmentApi).deleteShipment(eq(shipmentId), any());
+        verify(shipmentQueriesApi).deleteShipment(eq(shipmentId), any());
     }
 
     // ── getTracking ──────────────────────────────────────────────────────────
 
     @Test
-    void getTracking_shouldMapCoreShipmentToTrackingDto() {
+    void getTracking_shouldMapDomainShipmentToTrackingDto() {
         UUID distributorId = UUID.randomUUID();
         UUID shipmentId = UUID.randomUUID();
 
-        com.firefly.core.distributor.sdk.model.ShipmentDTO coreShipment = buildCoreShipment(shipmentId);
+        com.firefly.domain.distributor.catalog.sdk.model.ShipmentDTO domainShipment = buildDomainShipment(shipmentId);
         ShipmentTrackingDTO trackingDTO = ShipmentTrackingDTO.builder()
                 .shipmentId(shipmentId)
                 .trackingNumber("TRK-001")
@@ -257,8 +258,8 @@ class ShipmentServiceImplTest {
                 .currentStatus("IN_TRANSIT")
                 .build();
 
-        when(coreShipmentApi.getShipmentById(eq(shipmentId), any())).thenReturn(Mono.just(coreShipment));
-        when(shipmentMapper.toCoreTracking(coreShipment)).thenReturn(trackingDTO);
+        when(shipmentQueriesApi.getShipment(eq(shipmentId), any())).thenReturn(Mono.just(domainShipment));
+        when(shipmentMapper.toCatalogTracking(domainShipment)).thenReturn(trackingDTO);
 
         StepVerifier.create(service.getTracking(distributorId, shipmentId))
                 .assertNext(dto -> {
@@ -268,13 +269,13 @@ class ShipmentServiceImplTest {
                 })
                 .verifyComplete();
 
-        verify(coreShipmentApi).getShipmentById(eq(shipmentId), any());
+        verify(shipmentQueriesApi).getShipment(eq(shipmentId), any());
     }
 
     // ── updateStatus ─────────────────────────────────────────────────────────
 
     @Test
-    void updateStatus_shouldCallCoreUpdateStatusAndReturnDto() {
+    void updateStatus_shouldCallQueryApiUpdateStatusAndReturnDto() {
         UUID distributorId = UUID.randomUUID();
         UUID shipmentId = UUID.randomUUID();
 
@@ -283,13 +284,13 @@ class ShipmentServiceImplTest {
                 .notes("Delivered to front door")
                 .build();
 
-        com.firefly.core.distributor.sdk.model.ShipmentDTO coreShipment = buildCoreShipment(shipmentId);
+        com.firefly.domain.distributor.catalog.sdk.model.ShipmentDTO domainShipment = buildDomainShipment(shipmentId);
         ShipmentDTO expectedDto = buildExpShipmentDTO(shipmentId, distributorId);
         expectedDto.setStatus("DELIVERED");
 
-        when(coreShipmentApi.updateShipmentStatus(eq(shipmentId), eq("DELIVERED"), isNull(), any()))
-                .thenReturn(Mono.just(coreShipment));
-        when(shipmentMapper.toCoreDto(coreShipment)).thenReturn(expectedDto);
+        when(shipmentQueriesApi.updateShipmentStatus(eq(shipmentId), eq("DELIVERED"), isNull(), any()))
+                .thenReturn(Mono.just(domainShipment));
+        when(shipmentMapper.toCatalogDto(domainShipment)).thenReturn(expectedDto);
 
         StepVerifier.create(service.updateStatus(distributorId, shipmentId, request))
                 .assertNext(dto -> {
@@ -298,6 +299,6 @@ class ShipmentServiceImplTest {
                 })
                 .verifyComplete();
 
-        verify(coreShipmentApi).updateShipmentStatus(eq(shipmentId), eq("DELIVERED"), isNull(), any());
+        verify(shipmentQueriesApi).updateShipmentStatus(eq(shipmentId), eq("DELIVERED"), isNull(), any());
     }
 }

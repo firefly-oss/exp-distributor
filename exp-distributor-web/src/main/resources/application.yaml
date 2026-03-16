@@ -29,8 +29,6 @@ api-configuration:
       base-path: ${ENDPOINT_DOMAIN_COMMON_CONTRACTS:http://localhost:8080}
     common-notifications:
       base-path: ${ENDPOINT_DOMAIN_COMMON_NOTIFICATIONS:http://localhost:8095}
-    core-distributor:
-      base-path: ${ENDPOINT_CORE_DISTRIBUTOR:http://localhost:8080}
 
 springdoc:
   api-docs:

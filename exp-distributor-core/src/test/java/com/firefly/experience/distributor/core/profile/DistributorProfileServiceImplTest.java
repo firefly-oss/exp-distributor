@@ -1,7 +1,8 @@
 package com.firefly.experience.distributor.core.profile;
 
-import com.firefly.core.distributor.sdk.model.DistributorDTO;
 import com.firefly.domain.distributor.branding.sdk.api.DistributorApi;
+import com.firefly.domain.distributor.branding.sdk.api.DistributorQueryApi;
+import com.firefly.domain.distributor.branding.sdk.model.DistributorDTO;
 import com.firefly.domain.distributor.branding.sdk.model.RegisterDistributorCommand;
 import com.firefly.experience.distributor.core.branding.BrandingService;
 import com.firefly.experience.distributor.core.terms.TermsAndConditionsService;
@@ -33,7 +34,7 @@ class DistributorProfileServiceImplTest {
     private DistributorApi brandingDistributorApi;
 
     @Mock
-    private com.firefly.core.distributor.sdk.api.DistributorApi coreDistributorApi;
+    private DistributorQueryApi distributorQueryApi;
 
     @Mock
     private TermsAndConditionsService termsAndConditionsService;
@@ -74,11 +75,11 @@ class DistributorProfileServiceImplTest {
     void getDistributorDetail_shouldComposeFanOutFromMultipleSources() {
         UUID distributorId = UUID.randomUUID();
 
-        DistributorDTO coreProfile = new DistributorDTO();
-        coreProfile.setName("Acme Corp");
-        coreProfile.setDisplayName("Acme");
-        coreProfile.setEmail("info@acme.com");
-        coreProfile.setIsActive(true);
+        DistributorDTO profile = new DistributorDTO();
+        profile.setName("Acme Corp");
+        profile.setDisplayName("Acme");
+        profile.setEmail("info@acme.com");
+        profile.setIsActive(true);
 
         BrandingDTO defaultBranding = BrandingDTO.builder()
                 .id(UUID.randomUUID())
@@ -87,7 +88,7 @@ class DistributorProfileServiceImplTest {
                 .isDefault(true)
                 .build();
 
-        when(coreDistributorApi.getDistributorById(eq(distributorId), any())).thenReturn(Mono.just(coreProfile));
+        when(distributorQueryApi.getDistributorProfile(eq(distributorId), any())).thenReturn(Mono.just(profile));
         when(termsAndConditionsService.hasActiveSignedTerms(distributorId)).thenReturn(Mono.just(true));
         when(brandingService.listBrandings(distributorId)).thenReturn(Flux.just(defaultBranding));
 
@@ -107,11 +108,11 @@ class DistributorProfileServiceImplTest {
     void getDistributorDetail_shouldReturnEmptyBrandingWhenNoneIsDefault() {
         UUID distributorId = UUID.randomUUID();
 
-        DistributorDTO coreProfile = new DistributorDTO();
-        coreProfile.setName("Acme Corp");
-        coreProfile.setIsActive(false);
+        DistributorDTO profile = new DistributorDTO();
+        profile.setName("Acme Corp");
+        profile.setIsActive(false);
 
-        when(coreDistributorApi.getDistributorById(eq(distributorId), any())).thenReturn(Mono.just(coreProfile));
+        when(distributorQueryApi.getDistributorProfile(eq(distributorId), any())).thenReturn(Mono.just(profile));
         when(termsAndConditionsService.hasActiveSignedTerms(distributorId)).thenReturn(Mono.just(false));
         when(brandingService.listBrandings(distributorId)).thenReturn(Flux.empty());
 
@@ -125,7 +126,7 @@ class DistributorProfileServiceImplTest {
     }
 
     @Test
-    void updateDistributor_shouldCallCoreApiAndReturnRefreshedDetail() {
+    void updateDistributor_shouldCallQueryApiAndReturnRefreshedDetail() {
         UUID distributorId = UUID.randomUUID();
         UpdateDistributorRequest request = UpdateDistributorRequest.builder()
                 .name("Acme Corp Updated")
@@ -137,9 +138,9 @@ class DistributorProfileServiceImplTest {
         updatedProfile.setName("Acme Corp Updated");
         updatedProfile.setIsActive(true);
 
-        when(coreDistributorApi.updateDistributor(eq(distributorId), any(), any()))
+        when(distributorQueryApi.updateDistributor(eq(distributorId), any(), any()))
                 .thenReturn(Mono.just(updatedProfile));
-        when(coreDistributorApi.getDistributorById(eq(distributorId), any())).thenReturn(Mono.just(updatedProfile));
+        when(distributorQueryApi.getDistributorProfile(eq(distributorId), any())).thenReturn(Mono.just(updatedProfile));
         when(termsAndConditionsService.hasActiveSignedTerms(distributorId)).thenReturn(Mono.just(false));
         when(brandingService.listBrandings(distributorId)).thenReturn(Flux.empty());
 
@@ -150,17 +151,17 @@ class DistributorProfileServiceImplTest {
                 })
                 .verifyComplete();
 
-        verify(coreDistributorApi).updateDistributor(eq(distributorId), any(), any());
+        verify(distributorQueryApi).updateDistributor(eq(distributorId), any(), any());
     }
 
     @Test
-    void deleteDistributor_shouldCallDeleteOnCoreApi() {
+    void deleteDistributor_shouldCallDeleteOnQueryApi() {
         UUID distributorId = UUID.randomUUID();
-        when(coreDistributorApi.deleteDistributor(eq(distributorId), any())).thenReturn(Mono.empty());
+        when(distributorQueryApi.deleteDistributor(eq(distributorId), any())).thenReturn(Mono.empty());
 
         StepVerifier.create(service.deleteDistributor(distributorId))
                 .verifyComplete();
 
-        verify(coreDistributorApi).deleteDistributor(eq(distributorId), any());
+        verify(distributorQueryApi).deleteDistributor(eq(distributorId), any());
     }
 }

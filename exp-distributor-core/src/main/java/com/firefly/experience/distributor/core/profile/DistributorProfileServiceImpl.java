@@ -1,6 +1,8 @@
 package com.firefly.experience.distributor.core.profile;
 
 import com.firefly.domain.distributor.branding.sdk.api.DistributorApi;
+import com.firefly.domain.distributor.branding.sdk.api.DistributorQueryApi;
+import com.firefly.domain.distributor.branding.sdk.model.DistributorDTO;
 import com.firefly.domain.distributor.branding.sdk.model.RegisterDistributorCommand;
 import com.firefly.domain.distributor.branding.sdk.model.RegisterDistributorInfoCommand;
 import com.firefly.experience.distributor.core.branding.BrandingService;
@@ -21,7 +23,7 @@ import java.util.UUID;
  * Composite implementation of {@link DistributorProfileService}.
  *
  * <p>Routes writes to the domain-distributor-branding command SDK and reads to
- * the core-common-distributor-mgmt query SDK, aggregating both into a single
+ * the domain-distributor-branding query SDK, aggregating both into a single
  * journey-specific {@link DistributorDetailDTO}.
  */
 @Slf4j
@@ -33,9 +35,8 @@ public class DistributorProfileServiceImpl implements DistributorProfileService 
     @Qualifier("brandingDistributorApi")
     private final DistributorApi brandingDistributorApi;
 
-    /** Query-side SDK: provides full distributor CRUD. */
-    @Qualifier("coreDistributorApi")
-    private final com.firefly.core.distributor.sdk.api.DistributorApi coreDistributorApi;
+    /** Query-side SDK: provides distributor profile and branding CRUD. */
+    private final DistributorQueryApi distributorQueryApi;
 
     private final TermsAndConditionsService termsAndConditionsService;
     private final BrandingService brandingService;
@@ -52,8 +53,6 @@ public class DistributorProfileServiceImpl implements DistributorProfileService 
         RegisterDistributorCommand sdkCommand = new RegisterDistributorCommand();
         sdkCommand.setDistributorInfo(infoCommand);
 
-        // ARCH-EXCEPTION: domain-distributor-branding-sdk generated client does not expose an
-        // xIdempotencyKey parameter on onboardDistributor; idempotency cannot be set at call-site.
         return brandingDistributorApi.onboardDistributor(sdkCommand, UUID.randomUUID().toString())
                 .map(result -> {
                     UUID distributorId = (UUID) result;
@@ -72,8 +71,8 @@ public class DistributorProfileServiceImpl implements DistributorProfileService 
     @Override
     public Mono<DistributorDetailDTO> getDistributorDetail(UUID distributorId) {
         // Fan out three independent calls concurrently, then combine
-        Mono<com.firefly.core.distributor.sdk.model.DistributorDTO> profileMono =
-                coreDistributorApi.getDistributorById(distributorId, UUID.randomUUID().toString());
+        Mono<DistributorDTO> profileMono =
+                distributorQueryApi.getDistributorProfile(distributorId, null);
 
         Mono<Boolean> hasTermsMono =
                 termsAndConditionsService.hasActiveSignedTerms(distributorId);
@@ -85,7 +84,7 @@ public class DistributorProfileServiceImpl implements DistributorProfileService 
 
         return Mono.zip(profileMono, hasTermsMono, activeBrandingMono)
                 .map(t -> {
-                    com.firefly.core.distributor.sdk.model.DistributorDTO profile = t.getT1();
+                    DistributorDTO profile = t.getT1();
                     return DistributorDetailDTO.builder()
                             .id(distributorId)
                             .name(profile.getName())
@@ -101,24 +100,21 @@ public class DistributorProfileServiceImpl implements DistributorProfileService 
 
     @Override
     public Mono<DistributorDetailDTO> updateDistributor(UUID distributorId, UpdateDistributorRequest request) {
-        com.firefly.core.distributor.sdk.model.DistributorDTO updateDto =
-                new com.firefly.core.distributor.sdk.model.DistributorDTO();
+        DistributorDTO updateDto = new DistributorDTO();
         updateDto.setName(request.getName());
         updateDto.setDisplayName(request.getDisplayName());
         updateDto.setEmail(request.getEmail());
         updateDto.setPhoneNumber(request.getPhoneNumber());
         updateDto.setTaxId(request.getTaxId());
 
-        // ARCH-EXCEPTION: core-common-distributor-mgmt-sdk generated client does not expose an
-        // xIdempotencyKey parameter on updateDistributor; idempotency cannot be set at call-site.
-        return coreDistributorApi.updateDistributor(distributorId, updateDto, UUID.randomUUID().toString())
+        return distributorQueryApi.updateDistributor(distributorId, updateDto, UUID.randomUUID().toString())
                 .flatMap(updated -> getDistributorDetail(distributorId))
                 .doOnNext(dto -> log.info("Updated distributor: distributorId={}", distributorId));
     }
 
     @Override
     public Mono<Void> deleteDistributor(UUID distributorId) {
-        return coreDistributorApi.deleteDistributor(distributorId, UUID.randomUUID().toString())
+        return distributorQueryApi.deleteDistributor(distributorId, UUID.randomUUID().toString())
                 .doOnSuccess(v -> log.info("Deleted distributor: distributorId={}", distributorId));
     }
 }

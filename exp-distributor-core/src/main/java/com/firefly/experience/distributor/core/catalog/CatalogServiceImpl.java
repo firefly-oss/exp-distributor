@@ -32,7 +32,7 @@ public class CatalogServiceImpl implements CatalogService {
     @Override
     public Flux<CatalogItemDTO> listCatalog(UUID distributorId) {
         log.info("Listing catalog items for distributor: {}", distributorId);
-        return catalogDistributorApi.listCatalog(distributorId, UUID.randomUUID().toString())
+        return catalogDistributorApi.listCatalog(distributorId, null)
                 .map(catalogMapper::toDto);
     }
 
@@ -41,9 +41,6 @@ public class CatalogServiceImpl implements CatalogService {
     public Mono<UUID> addToCatalog(UUID distributorId, AddCatalogItemRequest request) {
         log.info("Adding catalog item for distributor: {}", distributorId);
         RegisterProductCommand cmd = new RegisterProductCommand();
-        // RegisterProductCommand is a composite command; set available sub-fields as needed
-        // ARCH-EXCEPTION: domain-distributor-catalog-sdk generated client does not expose an
-        // xIdempotencyKey parameter on registerProduct; idempotency cannot be set at call-site.
         return catalogDistributorApi.registerProduct(distributorId, cmd, UUID.randomUUID().toString())
                 .map(result -> (UUID) result);
     }
@@ -51,7 +48,7 @@ public class CatalogServiceImpl implements CatalogService {
     @Override
     public Mono<CatalogItemDTO> getCatalogItem(UUID distributorId, UUID catalogItemId) {
         log.info("Getting catalog item {} for distributor: {}", catalogItemId, distributorId);
-        return catalogDistributorApi.listCatalog(distributorId, UUID.randomUUID().toString())
+        return catalogDistributorApi.listCatalog(distributorId, null)
                 .filter(p -> catalogItemId.equals(p.getId()))
                 .next()
                 .map(catalogMapper::toDto);
@@ -62,9 +59,6 @@ public class CatalogServiceImpl implements CatalogService {
     public Mono<UUID> updateCatalogItem(UUID distributorId, UUID catalogItemId, UpdateCatalogItemRequest request) {
         log.info("Updating catalog item {} for distributor: {}", catalogItemId, distributorId);
         UpdateProductCommand cmd = new UpdateProductCommand();
-        // UpdateProductCommand is a composite command; set available sub-fields as needed
-        // ARCH-EXCEPTION: domain-distributor-catalog-sdk generated client does not expose an
-        // xIdempotencyKey parameter on reviseProduct; idempotency cannot be set at call-site.
         return catalogDistributorApi.reviseProduct(distributorId, catalogItemId, cmd, UUID.randomUUID().toString())
                 .map(result -> (UUID) result);
     }
@@ -74,8 +68,6 @@ public class CatalogServiceImpl implements CatalogService {
     public Mono<UUID> removeFromCatalog(UUID distributorId, UUID catalogItemId) {
         log.info("Removing catalog item {} for distributor: {}", catalogItemId, distributorId);
         UpdateProductInfoCommand cmd = new UpdateProductInfoCommand();
-        // ARCH-EXCEPTION: domain-distributor-catalog-sdk generated client does not expose an
-        // xIdempotencyKey parameter on retireProduct; idempotency cannot be set at call-site.
         return catalogDistributorApi.retireProduct(distributorId, catalogItemId, cmd, UUID.randomUUID().toString())
                 .map(result -> (UUID) result);
     }

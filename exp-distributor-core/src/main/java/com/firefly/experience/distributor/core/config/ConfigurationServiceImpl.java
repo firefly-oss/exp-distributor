@@ -27,7 +27,7 @@ public class ConfigurationServiceImpl implements ConfigurationService {
     @Override
     public Flux<ConfigurationDTO> listConfigurations(UUID distributorId) {
         log.info("Listing configurations for distributor: {}", distributorId);
-        return configurationApi.listConfigurations(distributorId, UUID.randomUUID().toString())
+        return configurationApi.listConfigurations(distributorId, null)
                 .flatMapMany(paginationResponse -> Flux.fromIterable(paginationResponse.getContent()))
                 .map(item -> {
                     DistributorConfigurationDTO sdk = mapObjectToConfigSdk(item);
@@ -39,10 +39,8 @@ public class ConfigurationServiceImpl implements ConfigurationService {
     public Mono<ConfigurationDTO> createConfiguration(UUID distributorId, CreateConfigurationRequest request) {
         log.info("Creating configuration for distributor: {}", distributorId);
         CreateConfigurationCommand command = configurationMapper.toCreateCommand(request);
-        // ARCH-EXCEPTION: domain-distributor-branding-sdk generated client does not expose an
-        // xIdempotencyKey parameter on createConfiguration; idempotency cannot be set at call-site.
         return configurationApi.createConfiguration(distributorId, command, UUID.randomUUID().toString())
-                .flatMap(configId -> configurationApi.getConfiguration(distributorId, configId, UUID.randomUUID().toString()))
+                .flatMap(configId -> configurationApi.getConfiguration(distributorId, configId, null))
                 .map(configurationMapper::toDto);
     }
 
@@ -50,10 +48,8 @@ public class ConfigurationServiceImpl implements ConfigurationService {
     public Mono<ConfigurationDTO> updateConfiguration(UUID distributorId, UUID configId, UpdateConfigurationRequest request) {
         log.info("Updating configuration {} for distributor: {}", configId, distributorId);
         UpdateConfigurationCommand command = configurationMapper.toUpdateCommand(request);
-        // ARCH-EXCEPTION: domain-distributor-branding-sdk generated client does not expose an
-        // xIdempotencyKey parameter on updateConfiguration; idempotency cannot be set at call-site.
         return configurationApi.updateConfiguration(distributorId, configId, command, UUID.randomUUID().toString())
-                .flatMap(updatedId -> configurationApi.getConfiguration(distributorId, updatedId, UUID.randomUUID().toString()))
+                .flatMap(updatedId -> configurationApi.getConfiguration(distributorId, updatedId, null))
                 .map(configurationMapper::toDto);
     }
 

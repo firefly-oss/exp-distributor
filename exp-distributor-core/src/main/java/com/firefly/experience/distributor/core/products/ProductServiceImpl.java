@@ -36,7 +36,7 @@ public class ProductServiceImpl implements ProductService {
     @Override
     public Flux<ProductDetailDTO> listProducts(UUID distributorId) {
         log.info("Listing products for distributor: {}", distributorId);
-        return catalogDistributorApi.listCatalog(distributorId, UUID.randomUUID().toString())
+        return catalogDistributorApi.listCatalog(distributorId, null)
                 .map(productMapper::fromCatalogDto);
     }
 
@@ -45,8 +45,6 @@ public class ProductServiceImpl implements ProductService {
     public Mono<UUID> registerProduct(UUID distributorId, RegisterProductRequest request) {
         log.info("Registering product for distributor: {}", distributorId);
         RegisterProductCommand cmd = new RegisterProductCommand();
-        // ARCH-EXCEPTION: domain-distributor-catalog-sdk generated client does not expose an
-        // xIdempotencyKey parameter on registerProduct; idempotency cannot be set at call-site.
         return catalogDistributorApi.registerProduct(distributorId, cmd, UUID.randomUUID().toString())
                 .map(result -> (UUID) result);
     }
@@ -54,7 +52,7 @@ public class ProductServiceImpl implements ProductService {
     @Override
     public Mono<ProductDetailDTO> getProduct(UUID distributorId, UUID productId) {
         log.info("Getting product {} for distributor: {}", productId, distributorId);
-        return productsApi.getProductInfo(productId, UUID.randomUUID().toString())
+        return productsApi.getProductInfo(productId, null)
                 .map(productMapper::toDto);
     }
 
@@ -63,8 +61,6 @@ public class ProductServiceImpl implements ProductService {
     public Mono<UUID> updateProduct(UUID distributorId, UUID productId, UpdateProductRequest request) {
         log.info("Updating product {} for distributor: {}", productId, distributorId);
         UpdateProductCommand cmd = new UpdateProductCommand();
-        // ARCH-EXCEPTION: domain-distributor-catalog-sdk generated client does not expose an
-        // xIdempotencyKey parameter on reviseProduct; idempotency cannot be set at call-site.
         return catalogDistributorApi.reviseProduct(distributorId, productId, cmd, UUID.randomUUID().toString())
                 .map(result -> (UUID) result);
     }
@@ -79,7 +75,7 @@ public class ProductServiceImpl implements ProductService {
     @Override
     public Flux<ProductDetailDTO> listActiveProducts(UUID distributorId) {
         log.info("Listing active products for distributor: {}", distributorId);
-        return catalogDistributorApi.listCatalog(distributorId, UUID.randomUUID().toString())
+        return catalogDistributorApi.listCatalog(distributorId, null)
                 .filter(p -> Boolean.TRUE.equals(p.getIsActive()))
                 .map(productMapper::fromCatalogDto);
     }

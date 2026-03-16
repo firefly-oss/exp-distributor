@@ -24,7 +24,7 @@ public class AgentAgencyServiceImpl implements AgentAgencyService {
     @Override
     public Flux<AgentAgencyDTO> listAssignments(UUID distributorId) {
         // The SDK listAgentAgencies returns Mono<Void> (no body), so return empty flux
-        return agentAgencyApi.listAgentAgencies(distributorId, UUID.randomUUID().toString())
+        return agentAgencyApi.listAgentAgencies(distributorId, null)
                 .thenMany(Flux.empty());
     }
 
@@ -32,8 +32,6 @@ public class AgentAgencyServiceImpl implements AgentAgencyService {
     public Mono<AgentAgencyDTO> assignAgentToAgency(UUID distributorId, AssignAgentRequest request) {
         AssignAgentAgencyCommand command = agentAgencyMapper.toCommand(request);
 
-        // ARCH-EXCEPTION: domain-distributor-branding-sdk generated client does not expose an
-        // xIdempotencyKey parameter on assignAgentAgency; idempotency cannot be set at call-site.
         return agentAgencyApi.assignAgentAgency(distributorId, command, UUID.randomUUID().toString())
                 .map(id -> AgentAgencyDTO.builder()
                         .id(id)

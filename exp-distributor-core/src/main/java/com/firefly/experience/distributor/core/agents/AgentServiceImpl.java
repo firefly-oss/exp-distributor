@@ -26,7 +26,7 @@ public class AgentServiceImpl implements AgentService {
 
     @Override
     public Flux<AgentDTO> listAgents(UUID distributorId) {
-        return agentApi.listAgents(distributorId, UUID.randomUUID().toString())
+        return agentApi.listAgents(distributorId, null)
                 .flatMapMany(paginationResponse -> Flux.fromIterable(paginationResponse.getContent()))
                 .map(item -> {
                     DistributorAgentDTO sdk = mapObjectToAgentSdk(item);
@@ -38,16 +38,14 @@ public class AgentServiceImpl implements AgentService {
     public Mono<AgentDTO> createAgent(UUID distributorId, CreateAgentRequest request) {
         CreateAgentCommand command = agentMapper.toCreateCommand(request);
 
-        // ARCH-EXCEPTION: domain-distributor-branding-sdk generated client does not expose an
-        // xIdempotencyKey parameter on createAgent; idempotency cannot be set at call-site.
         return agentApi.createAgent(distributorId, command, UUID.randomUUID().toString())
-                .flatMap(id -> agentApi.getAgent(distributorId, id, UUID.randomUUID().toString()))
+                .flatMap(id -> agentApi.getAgent(distributorId, id, null))
                 .map(agentMapper::toDto);
     }
 
     @Override
     public Mono<AgentDTO> getAgent(UUID distributorId, UUID agentId) {
-        return agentApi.getAgent(distributorId, agentId, UUID.randomUUID().toString())
+        return agentApi.getAgent(distributorId, agentId, null)
                 .map(agentMapper::toDto);
     }
 
@@ -55,10 +53,8 @@ public class AgentServiceImpl implements AgentService {
     public Mono<AgentDTO> updateAgent(UUID distributorId, UUID agentId, UpdateAgentRequest request) {
         UpdateAgentCommand command = agentMapper.toUpdateCommand(request);
 
-        // ARCH-EXCEPTION: domain-distributor-branding-sdk generated client does not expose an
-        // xIdempotencyKey parameter on updateAgent; idempotency cannot be set at call-site.
         return agentApi.updateAgent(distributorId, agentId, command, UUID.randomUUID().toString())
-                .flatMap(id -> agentApi.getAgent(distributorId, id, UUID.randomUUID().toString()))
+                .flatMap(id -> agentApi.getAgent(distributorId, id, null))
                 .map(agentMapper::toDto);
     }
 

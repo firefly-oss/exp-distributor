@@ -1,7 +1,7 @@
 package com.firefly.experience.distributor.core.shipments;
 
-import com.firefly.core.distributor.sdk.api.ShipmentApi;
 import com.firefly.domain.distributor.catalog.sdk.api.DistributorApi;
+import com.firefly.domain.distributor.catalog.sdk.api.ShipmentQueriesApi;
 import com.firefly.domain.distributor.catalog.sdk.model.RegisterShipmentCommand;
 import com.firefly.experience.distributor.core.mappers.ShipmentMapper;
 import com.firefly.experience.distributor.interfaces.dtos.RegisterShipmentRequest;
@@ -22,10 +22,10 @@ import java.util.UUID;
  *
  * <p>Write operations (register) route to the catalog command SDK
  * ({@code domain-distributor-catalog}), while read/CRUD operations route to
- * the core query SDK ({@code core-common-distributor-mgmt}).
+ * the catalog query SDK ({@code domain-distributor-catalog} ShipmentQueriesApi).
  *
  * <p>{@link #listShipments} fans out across all catalog items for the distributor
- * — {@code listCatalog} → per-product {@code trackProductShipments} — because
+ * -- {@code listCatalog} -> per-product {@code trackProductShipments} -- because
  * neither SDK exposes a direct "list shipments by distributorId" endpoint.
  */
 @Service
@@ -33,15 +33,15 @@ import java.util.UUID;
 public class ShipmentServiceImpl implements ShipmentService {
 
     private final DistributorApi catalogDistributorApi;
-    private final ShipmentApi coreShipmentApi;
+    private final ShipmentQueriesApi shipmentQueriesApi;
     private final ShipmentMapper shipmentMapper;
 
     public ShipmentServiceImpl(
             @Qualifier("catalogDistributorApi") DistributorApi catalogDistributorApi,
-            @Qualifier("coreShipmentApi") ShipmentApi coreShipmentApi,
+            ShipmentQueriesApi shipmentQueriesApi,
             ShipmentMapper shipmentMapper) {
         this.catalogDistributorApi = catalogDistributorApi;
-        this.coreShipmentApi = coreShipmentApi;
+        this.shipmentQueriesApi = shipmentQueriesApi;
         this.shipmentMapper = shipmentMapper;
     }
 
@@ -53,10 +53,10 @@ public class ShipmentServiceImpl implements ShipmentService {
     @Override
     public Flux<ShipmentDTO> listShipments(UUID distributorId) {
         log.info("Listing shipments for distributor: {}", distributorId);
-        return catalogDistributorApi.listCatalog(distributorId, UUID.randomUUID().toString())
+        return catalogDistributorApi.listCatalog(distributorId, null)
                 .filter(product -> product.getId() != null)
                 .flatMap(product ->
-                        catalogDistributorApi.trackProductShipments(distributorId, product.getId(), UUID.randomUUID().toString()))
+                        catalogDistributorApi.trackProductShipments(distributorId, product.getId(), null))
                 .map(sdkShipment -> {
                     ShipmentDTO dto = shipmentMapper.toCatalogShipmentDto(sdkShipment);
                     dto.setDistributorId(distributorId);
@@ -66,7 +66,7 @@ public class ShipmentServiceImpl implements ShipmentService {
 
     /**
      * Registers a new shipment via the catalog command SDK, then reads back the
-     * full record from the core CRUD SDK to return a complete {@link ShipmentDTO}.
+     * full record from the catalog query SDK to return a complete {@link ShipmentDTO}.
      */
     @Override
     @SuppressWarnings("unchecked")
@@ -74,15 +74,13 @@ public class ShipmentServiceImpl implements ShipmentService {
         log.info("Registering shipment for distributor: {}", distributorId);
         RegisterShipmentCommand cmd = shipmentMapper.toCommand(request);
         cmd.setProductId(request.getProductId());
-        // ARCH-EXCEPTION: domain-distributor-catalog-sdk generated client does not expose an
-        // xIdempotencyKey parameter on shipContractItem; idempotency cannot be set at call-site.
         return catalogDistributorApi.shipContractItem(distributorId, request.getProductId(), cmd, UUID.randomUUID().toString())
                 .flatMap(result -> {
                     UUID shipmentId = (UUID) result;
-                    return coreShipmentApi.getShipmentById(shipmentId, UUID.randomUUID().toString());
+                    return shipmentQueriesApi.getShipment(shipmentId, null);
                 })
                 .map(sdkShipment -> {
-                    ShipmentDTO dto = shipmentMapper.toCoreDto(sdkShipment);
+                    ShipmentDTO dto = shipmentMapper.toCatalogDto(sdkShipment);
                     dto.setDistributorId(distributorId);
                     return dto;
                 });
@@ -91,9 +89,9 @@ public class ShipmentServiceImpl implements ShipmentService {
     @Override
     public Mono<ShipmentDTO> getShipment(UUID distributorId, UUID shipmentId) {
         log.info("Getting shipment: {}, distributor: {}", shipmentId, distributorId);
-        return coreShipmentApi.getShipmentById(shipmentId, UUID.randomUUID().toString())
+        return shipmentQueriesApi.getShipment(shipmentId, null)
                 .map(sdkShipment -> {
-                    ShipmentDTO dto = shipmentMapper.toCoreDto(sdkShipment);
+                    ShipmentDTO dto = shipmentMapper.toCatalogDto(sdkShipment);
                     dto.setDistributorId(distributorId);
                     return dto;
                 });
@@ -103,13 +101,11 @@ public class ShipmentServiceImpl implements ShipmentService {
     public Mono<ShipmentDTO> updateShipment(UUID distributorId, UUID shipmentId,
                                              UpdateShipmentRequest request) {
         log.info("Updating shipment: {}, distributor: {}", shipmentId, distributorId);
-        com.firefly.core.distributor.sdk.model.ShipmentDTO updateCmd =
+        com.firefly.domain.distributor.catalog.sdk.model.ShipmentDTO updateCmd =
                 shipmentMapper.toUpdateSdkDto(request);
-        // ARCH-EXCEPTION: core-common-distributor-mgmt-sdk generated client does not expose an
-        // xIdempotencyKey parameter on updateShipment; idempotency cannot be set at call-site.
-        return coreShipmentApi.updateShipment(shipmentId, updateCmd, UUID.randomUUID().toString())
+        return shipmentQueriesApi.updateShipment(shipmentId, updateCmd, UUID.randomUUID().toString())
                 .map(sdkShipment -> {
-                    ShipmentDTO dto = shipmentMapper.toCoreDto(sdkShipment);
+                    ShipmentDTO dto = shipmentMapper.toCatalogDto(sdkShipment);
                     dto.setDistributorId(distributorId);
                     return dto;
                 });
@@ -118,31 +114,29 @@ public class ShipmentServiceImpl implements ShipmentService {
     @Override
     public Mono<Void> deleteShipment(UUID distributorId, UUID shipmentId) {
         log.info("Deleting shipment: {}, distributor: {}", shipmentId, distributorId);
-        return coreShipmentApi.deleteShipment(shipmentId, UUID.randomUUID().toString());
+        return shipmentQueriesApi.deleteShipment(shipmentId, UUID.randomUUID().toString());
     }
 
     /**
-     * Returns tracking details by reading the shipment from the core SDK.
-     * The core {@link ShipmentDTO} carries trackingNumber, carrier, and status
-     * sufficient to populate a {@link ShipmentTrackingDTO} without a separate
-     * catalog call.
+     * Returns tracking details by reading the shipment from the catalog query SDK.
+     * The catalog {@link com.firefly.domain.distributor.catalog.sdk.model.ShipmentDTO}
+     * carries trackingNumber, carrier, and status sufficient to populate a
+     * {@link ShipmentTrackingDTO} without a separate catalog call.
      */
     @Override
     public Mono<ShipmentTrackingDTO> getTracking(UUID distributorId, UUID shipmentId) {
         log.info("Getting tracking for shipment: {}, distributor: {}", shipmentId, distributorId);
-        return coreShipmentApi.getShipmentById(shipmentId, UUID.randomUUID().toString())
-                .map(shipmentMapper::toCoreTracking);
+        return shipmentQueriesApi.getShipment(shipmentId, null)
+                .map(shipmentMapper::toCatalogTracking);
     }
 
     @Override
     public Mono<ShipmentDTO> updateStatus(UUID distributorId, UUID shipmentId,
                                            UpdateStatusRequest request) {
         log.info("Updating status for shipment: {}, distributor: {}", shipmentId, distributorId);
-        // ARCH-EXCEPTION: core-common-distributor-mgmt-sdk generated client does not expose an
-        // xIdempotencyKey parameter on updateShipmentStatus; idempotency cannot be set at call-site.
-        return coreShipmentApi.updateShipmentStatus(shipmentId, request.getStatus(), null, UUID.randomUUID().toString())
+        return shipmentQueriesApi.updateShipmentStatus(shipmentId, request.getStatus(), null, UUID.randomUUID().toString())
                 .map(sdkShipment -> {
-                    ShipmentDTO dto = shipmentMapper.toCoreDto(sdkShipment);
+                    ShipmentDTO dto = shipmentMapper.toCatalogDto(sdkShipment);
                     dto.setDistributorId(distributorId);
                     return dto;
                 });

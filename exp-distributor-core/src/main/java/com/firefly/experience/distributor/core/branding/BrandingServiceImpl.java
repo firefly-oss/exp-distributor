@@ -1,8 +1,9 @@
 package com.firefly.experience.distributor.core.branding;
 
-import com.firefly.core.distributor.sdk.api.DistributorBrandingApi;
-import com.firefly.core.distributor.sdk.model.FilterRequestDistributorBrandingDTO;
 import com.firefly.domain.distributor.branding.sdk.api.DistributorApi;
+import com.firefly.domain.distributor.branding.sdk.api.DistributorQueryApi;
+import com.firefly.domain.distributor.branding.sdk.model.DistributorBrandingDTO;
+import com.firefly.domain.distributor.branding.sdk.model.FilterRequestDistributorBrandingDTO;
 import com.firefly.domain.distributor.branding.sdk.model.ReviseBrandingCommand;
 import com.firefly.domain.distributor.branding.sdk.model.SetDefaultBrandingCommand;
 import com.firefly.experience.distributor.interfaces.dtos.BrandingDTO;
@@ -22,7 +23,7 @@ import java.util.UUID;
  *
  * <p>Writes (create, update, setDefault) delegate to the domain-distributor-branding
  * command SDK where applicable. Reads (list, get) and delete use the
- * core-common-distributor-mgmt query SDK's {@link DistributorBrandingApi}.
+ * domain-distributor-branding query SDK's {@link DistributorQueryApi}.
  */
 @Slf4j
 @RequiredArgsConstructor
@@ -34,36 +35,31 @@ public class BrandingServiceImpl implements BrandingService {
     private final DistributorApi brandingDistributorApi;
 
     /** Query-side SDK: full CRUD for distributor branding. */
-    @Qualifier("distributorBrandingApi")
-    private final DistributorBrandingApi distributorBrandingApi;
+    private final DistributorQueryApi distributorQueryApi;
 
     @Override
     public Flux<BrandingDTO> listBrandings(UUID distributorId) {
         log.info("Listing brandings for distributor: {}", distributorId);
-        return distributorBrandingApi
+        return distributorQueryApi
                 .filterDistributorBrandingsWithResponseSpec(
-                        distributorId, new FilterRequestDistributorBrandingDTO(), UUID.randomUUID().toString())
-                .bodyToFlux(com.firefly.core.distributor.sdk.model.DistributorBrandingDTO.class)
+                        distributorId, new FilterRequestDistributorBrandingDTO(), null)
+                .bodyToFlux(DistributorBrandingDTO.class)
                 .map(this::toDTO);
     }
 
     @Override
     public Mono<BrandingDTO> createBranding(UUID distributorId, CreateBrandingRequest request) {
         log.info("Creating branding for distributor: {}", distributorId);
-        com.firefly.core.distributor.sdk.model.DistributorBrandingDTO dto =
-                new com.firefly.core.distributor.sdk.model.DistributorBrandingDTO();
+        DistributorBrandingDTO dto = new DistributorBrandingDTO();
         dto.setDistributorId(distributorId);
         dto.setLogoUrl(request.getLogoUrl());
         dto.setPrimaryColor(request.getPrimaryColor());
         dto.setSecondaryColor(request.getSecondaryColor());
         dto.setFontFamily(request.getFontFamily());
         if (request.getTheme() != null) {
-            dto.setTheme(com.firefly.core.distributor.sdk.model.DistributorBrandingDTO.ThemeEnum
-                    .fromValue(request.getTheme()));
+            dto.setTheme(DistributorBrandingDTO.ThemeEnum.fromValue(request.getTheme()));
         }
-        // ARCH-EXCEPTION: core-common-distributor-mgmt-sdk generated client does not expose an
-        // xIdempotencyKey parameter on createDistributorBranding; idempotency cannot be set at call-site.
-        return distributorBrandingApi.createDistributorBranding(distributorId, dto, UUID.randomUUID().toString())
+        return distributorQueryApi.createDistributorBranding(distributorId, dto, UUID.randomUUID().toString())
                 .map(this::toDTO)
                 .doOnNext(b -> log.info("Created branding: distributorId={}, brandingId={}",
                         distributorId, b.getId()));
@@ -72,7 +68,7 @@ public class BrandingServiceImpl implements BrandingService {
     @Override
     public Mono<BrandingDTO> getBranding(UUID distributorId, UUID brandingId) {
         log.info("Getting branding {} for distributor: {}", brandingId, distributorId);
-        return distributorBrandingApi.getDistributorBrandingById(distributorId, brandingId, UUID.randomUUID().toString())
+        return distributorQueryApi.getDistributorBranding(distributorId, brandingId, null)
                 .map(this::toDTO);
     }
 
@@ -89,8 +85,6 @@ public class BrandingServiceImpl implements BrandingService {
             command.setTheme(ReviseBrandingCommand.ThemeEnum.fromValue(request.getTheme()));
         }
         // After command, fetch updated projection from the query SDK
-        // ARCH-EXCEPTION: domain-distributor-branding-sdk generated client does not expose an
-        // xIdempotencyKey parameter on reviseBranding; idempotency cannot be set at call-site.
         return brandingDistributorApi.reviseBranding(distributorId, brandingId, command, UUID.randomUUID().toString())
                 .flatMap(result -> getBranding(distributorId, brandingId))
                 .doOnNext(b -> log.info("Updated branding: distributorId={}, brandingId={}",
@@ -100,7 +94,7 @@ public class BrandingServiceImpl implements BrandingService {
     @Override
     public Mono<Void> deleteBranding(UUID distributorId, UUID brandingId) {
         log.info("Deleting branding {} for distributor: {}", brandingId, distributorId);
-        return distributorBrandingApi.deleteDistributorBranding(distributorId, brandingId, UUID.randomUUID().toString())
+        return distributorQueryApi.deleteDistributorBranding(distributorId, brandingId, UUID.randomUUID().toString())
                 .doOnSuccess(v -> log.info("Deleted branding: distributorId={}, brandingId={}",
                         distributorId, brandingId));
     }
@@ -109,8 +103,6 @@ public class BrandingServiceImpl implements BrandingService {
     public Mono<BrandingDTO> setDefaultBranding(UUID distributorId, UUID brandingId) {
         log.info("Setting default branding {} for distributor: {}", brandingId, distributorId);
         // Write command via domain SDK, then read updated projection
-        // ARCH-EXCEPTION: domain-distributor-branding-sdk generated client does not expose an
-        // xIdempotencyKey parameter on setDefaultBranding; idempotency cannot be set at call-site.
         return brandingDistributorApi.setDefaultBranding(distributorId, brandingId,
                         new SetDefaultBrandingCommand(), UUID.randomUUID().toString())
                 .flatMap(result -> getBranding(distributorId, brandingId))
@@ -118,7 +110,7 @@ public class BrandingServiceImpl implements BrandingService {
                         distributorId, brandingId));
     }
 
-    private BrandingDTO toDTO(com.firefly.core.distributor.sdk.model.DistributorBrandingDTO sdkDto) {
+    private BrandingDTO toDTO(DistributorBrandingDTO sdkDto) {
         return BrandingDTO.builder()
                 .id(sdkDto.getId())
                 .distributorId(sdkDto.getDistributorId())

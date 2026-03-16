@@ -5,10 +5,8 @@ import com.firefly.domain.distributor.branding.sdk.api.AgentAgencyApi;
 import com.firefly.domain.distributor.branding.sdk.api.AgentApi;
 import com.firefly.domain.distributor.branding.sdk.api.ConfigurationApi;
 import com.firefly.domain.distributor.branding.sdk.api.DistributorApi;
-import com.firefly.domain.distributor.branding.sdk.api.EligibilityApi;
-import com.firefly.domain.distributor.branding.sdk.api.FeesApi;
+import com.firefly.domain.distributor.branding.sdk.api.DistributorQueryApi;
 import com.firefly.domain.distributor.branding.sdk.api.OperationApi;
-import com.firefly.domain.distributor.branding.sdk.api.PricingApi;
 import com.firefly.domain.distributor.branding.sdk.api.TermsAndConditionsApi;
 import com.firefly.domain.distributor.branding.sdk.api.TerritoryApi;
 import com.firefly.domain.distributor.branding.sdk.invoker.ApiClient;
@@ -35,13 +33,26 @@ public class DistributorBrandingClientFactory {
     }
 
     /**
-     * Provides the {@link DistributorApi} bean for distributor profile operations.
+     * Provides the {@link DistributorApi} bean for distributor command operations
+     * (onboard, reviseBranding, setDefaultBranding, reviseTermsAndConditions).
      *
      * @return a ready-to-use DistributorApi instance
      */
     @Bean
     public DistributorApi brandingDistributorApi() {
         return new DistributorApi(apiClient);
+    }
+
+    /**
+     * Provides the {@link DistributorQueryApi} bean for distributor query operations
+     * (getDistributorProfile, getDistributorBranding, filterDistributorBrandings,
+     * createDistributorBranding, deleteDistributorBranding, updateDistributor, deleteDistributor).
+     *
+     * @return a ready-to-use DistributorQueryApi instance
+     */
+    @Bean
+    public DistributorQueryApi distributorQueryApi() {
+        return new DistributorQueryApi(apiClient);
     }
 
     /**
@@ -112,35 +123,5 @@ public class DistributorBrandingClientFactory {
     @Bean
     public ConfigurationApi configurationApi() {
         return new ConfigurationApi(apiClient);
-    }
-
-    /**
-     * Provides the {@link EligibilityApi} bean for distributor eligibility operations.
-     *
-     * @return a ready-to-use EligibilityApi instance
-     */
-    @Bean
-    public EligibilityApi brandingEligibilityApi() {
-        return new EligibilityApi(apiClient);
-    }
-
-    /**
-     * Provides the {@link FeesApi} bean for distributor fee operations.
-     *
-     * @return a ready-to-use FeesApi instance
-     */
-    @Bean
-    public FeesApi brandingFeesApi() {
-        return new FeesApi(apiClient);
-    }
-
-    /**
-     * Provides the {@link PricingApi} bean for distributor pricing operations.
-     *
-     * @return a ready-to-use PricingApi instance
-     */
-    @Bean
-    public PricingApi brandingPricingApi() {
-        return new PricingApi(apiClient);
     }
 }

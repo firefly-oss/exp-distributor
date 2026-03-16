@@ -29,22 +29,20 @@ public class TerritoryServiceImpl implements TerritoryService {
 
         CreateTerritoryCommand command = territoryMapper.toCreateCommand(request);
 
-        // ARCH-EXCEPTION: domain-distributor-branding-sdk generated client does not expose an
-        // xIdempotencyKey parameter on createTerritory; idempotency cannot be set at call-site.
         return territoryApi.createTerritory(distributorId, command, UUID.randomUUID().toString());
     }
 
     @Override
     public Mono<TerritoryDTO> getTerritory(UUID distributorId, UUID territoryId) {
         log.info("Getting territory {} for distributor: {}", territoryId, distributorId);
-        return territoryApi.getTerritory(distributorId, territoryId, UUID.randomUUID().toString())
+        return territoryApi.getTerritory(distributorId, territoryId, null)
                 .map(territoryMapper::toDto);
     }
 
     @Override
     public Mono<PaginationResponse> listTerritories(UUID distributorId) {
         log.info("Listing territories for distributor: {}", distributorId);
-        return territoryApi.listTerritories(distributorId, UUID.randomUUID().toString());
+        return territoryApi.listTerritories(distributorId, null);
     }
 
     @Override
@@ -53,8 +51,6 @@ public class TerritoryServiceImpl implements TerritoryService {
 
         UpdateTerritoryCommand command = territoryMapper.toUpdateCommand(request);
 
-        // ARCH-EXCEPTION: domain-distributor-branding-sdk generated client does not expose an
-        // xIdempotencyKey parameter on updateTerritory; idempotency cannot be set at call-site.
         return territoryApi.updateTerritory(distributorId, territoryId, command, UUID.randomUUID().toString());
     }
 

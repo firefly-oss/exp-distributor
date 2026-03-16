@@ -29,22 +29,20 @@ public class AgencyServiceImpl implements AgencyService {
 
         CreateAgencyCommand command = agencyMapper.toCreateCommand(request);
 
-        // ARCH-EXCEPTION: domain-distributor-branding-sdk generated client does not expose an
-        // xIdempotencyKey parameter on createAgency; idempotency cannot be set at call-site.
         return agencyApi.createAgency(distributorId, command, UUID.randomUUID().toString());
     }
 
     @Override
     public Mono<AgencyDTO> getAgency(UUID distributorId, UUID agencyId) {
         log.info("Getting agency {} for distributor: {}", agencyId, distributorId);
-        return agencyApi.getAgency(distributorId, agencyId, UUID.randomUUID().toString())
+        return agencyApi.getAgency(distributorId, agencyId, null)
                 .map(agencyMapper::toDto);
     }
 
     @Override
     public Mono<PaginationResponse> listAgencies(UUID distributorId) {
         log.info("Listing agencies for distributor: {}", distributorId);
-        return agencyApi.listAgencies(distributorId, UUID.randomUUID().toString());
+        return agencyApi.listAgencies(distributorId, null);
     }
 
     @Override
@@ -53,8 +51,6 @@ public class AgencyServiceImpl implements AgencyService {
 
         UpdateAgencyCommand command = agencyMapper.toUpdateCommand(request);
 
-        // ARCH-EXCEPTION: domain-distributor-branding-sdk generated client does not expose an
-        // xIdempotencyKey parameter on updateAgency; idempotency cannot be set at call-site.
         return agencyApi.updateAgency(distributorId, agencyId, command, UUID.randomUUID().toString());
     }
 

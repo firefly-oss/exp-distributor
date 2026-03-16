@@ -1,6 +1,7 @@
 package com.firefly.experience.distributor.infra;
 
 import com.firefly.domain.distributor.catalog.sdk.api.DistributorApi;
+import com.firefly.domain.distributor.catalog.sdk.api.ShipmentQueriesApi;
 import com.firefly.domain.distributor.catalog.sdk.api.SimulationsApi;
 import com.firefly.domain.distributor.catalog.sdk.invoker.ApiClient;
 import org.springframework.context.annotation.Bean;
@@ -24,5 +25,16 @@ public class DistributorCatalogClientFactory {
     @Bean
     public SimulationsApi simulationsApi() {
         return new SimulationsApi(apiClient);
+    }
+
+    /**
+     * Provides the {@link ShipmentQueriesApi} bean for shipment query and mutation operations
+     * (getShipment, updateShipment, deleteShipment, updateShipmentStatus).
+     *
+     * @return a ready-to-use ShipmentQueriesApi instance
+     */
+    @Bean
+    public ShipmentQueriesApi shipmentQueriesApi() {
+        return new ShipmentQueriesApi(apiClient);
     }
 }
