@@ -25,7 +25,7 @@ public class TermsAndConditionsServiceImpl implements TermsAndConditionsService 
     @Override
     public Flux<TermsDTO> listTerms(UUID distributorId) {
         log.info("Listing terms and conditions for distributor: {}", distributorId);
-        return termsAndConditionsApi.listTermsAndConditions(distributorId)
+        return termsAndConditionsApi.listTermsAndConditions(distributorId, UUID.randomUUID().toString())
                 .map(termsMapper::toDto)
                 .flux();
     }
@@ -33,7 +33,7 @@ public class TermsAndConditionsServiceImpl implements TermsAndConditionsService 
     @Override
     public Flux<TermsDTO> getActiveTerms(UUID distributorId) {
         log.info("Getting active terms and conditions for distributor: {}", distributorId);
-        return termsAndConditionsApi.getActiveTermsAndConditions(distributorId)
+        return termsAndConditionsApi.getActiveTermsAndConditions(distributorId, UUID.randomUUID().toString())
                 .map(termsMapper::toDto)
                 .flux();
     }
@@ -41,7 +41,7 @@ public class TermsAndConditionsServiceImpl implements TermsAndConditionsService 
     @Override
     public Mono<TermsDTO> getLatestTerms(UUID distributorId) {
         log.info("Getting latest terms and conditions for distributor: {}", distributorId);
-        return termsAndConditionsApi.getLatestTermsAndConditions(distributorId)
+        return termsAndConditionsApi.getLatestTermsAndConditions(distributorId, UUID.randomUUID().toString())
                 .map(termsMapper::toDto);
     }
 
@@ -51,15 +51,15 @@ public class TermsAndConditionsServiceImpl implements TermsAndConditionsService 
         CreateTermsAndConditionsCommand command = termsMapper.toCreateCommand(request);
         // ARCH-EXCEPTION: domain-distributor-branding-sdk generated client does not expose an
         // xIdempotencyKey parameter on createTermsAndConditions; idempotency cannot be set at call-site.
-        return termsAndConditionsApi.createTermsAndConditions(distributorId, command)
-                .flatMap(tcId -> termsAndConditionsApi.getTermsAndConditionsDetail(distributorId, tcId))
+        return termsAndConditionsApi.createTermsAndConditions(distributorId, command, UUID.randomUUID().toString())
+                .flatMap(tcId -> termsAndConditionsApi.getTermsAndConditionsDetail(distributorId, tcId, UUID.randomUUID().toString()))
                 .map(termsMapper::toDto);
     }
 
     @Override
     public Mono<TermsDTO> getTermsDetail(UUID distributorId, UUID tcId) {
         log.info("Getting terms and conditions detail {} for distributor: {}", tcId, distributorId);
-        return termsAndConditionsApi.getTermsAndConditionsDetail(distributorId, tcId)
+        return termsAndConditionsApi.getTermsAndConditionsDetail(distributorId, tcId, UUID.randomUUID().toString())
                 .map(termsMapper::toDto);
     }
 
@@ -67,43 +67,43 @@ public class TermsAndConditionsServiceImpl implements TermsAndConditionsService 
     public Mono<TermsDTO> updateTerms(UUID distributorId, UUID tcId, UpdateTermsRequest request) {
         log.info("Updating terms and conditions {} for distributor: {}", tcId, distributorId);
         CreateTermsAndConditionsCommand command = termsMapper.toUpdateCommand(request);
-        return termsAndConditionsApi.deleteTermsAndConditions(distributorId, tcId)
-                .then(termsAndConditionsApi.createTermsAndConditions(distributorId, command))
-                .flatMap(newTcId -> termsAndConditionsApi.getTermsAndConditionsDetail(distributorId, newTcId))
+        return termsAndConditionsApi.deleteTermsAndConditions(distributorId, tcId, UUID.randomUUID().toString())
+                .then(termsAndConditionsApi.createTermsAndConditions(distributorId, command, UUID.randomUUID().toString()))
+                .flatMap(newTcId -> termsAndConditionsApi.getTermsAndConditionsDetail(distributorId, newTcId, UUID.randomUUID().toString()))
                 .map(termsMapper::toDto);
     }
 
     @Override
     public Mono<Void> deleteTerms(UUID distributorId, UUID tcId) {
         log.info("Deleting terms and conditions {} for distributor: {}", tcId, distributorId);
-        return termsAndConditionsApi.deleteTermsAndConditions(distributorId, tcId);
+        return termsAndConditionsApi.deleteTermsAndConditions(distributorId, tcId, UUID.randomUUID().toString());
     }
 
     @Override
     public Mono<TermsDTO> signTerms(UUID distributorId, UUID tcId) {
         log.info("Signing terms and conditions {} for distributor: {}", tcId, distributorId);
-        return termsAndConditionsApi.signTermsAndConditions(distributorId, tcId, UUID.randomUUID())
+        return termsAndConditionsApi.signTermsAndConditions(distributorId, tcId, UUID.randomUUID(), UUID.randomUUID().toString())
                 .map(termsMapper::toDto);
     }
 
     @Override
     public Mono<TermsDTO> activateTerms(UUID distributorId, UUID tcId) {
         log.info("Activating terms and conditions {} for distributor: {}", tcId, distributorId);
-        return termsAndConditionsApi.activateTermsAndConditions(distributorId, tcId, UUID.randomUUID())
+        return termsAndConditionsApi.activateTermsAndConditions(distributorId, tcId, UUID.randomUUID(), UUID.randomUUID().toString())
                 .map(termsMapper::toDto);
     }
 
     @Override
     public Mono<TermsDTO> deactivateTerms(UUID distributorId, UUID tcId) {
         log.info("Deactivating terms and conditions {} for distributor: {}", tcId, distributorId);
-        return termsAndConditionsApi.deactivateTermsAndConditions(distributorId, tcId, UUID.randomUUID())
+        return termsAndConditionsApi.deactivateTermsAndConditions(distributorId, tcId, UUID.randomUUID(), UUID.randomUUID().toString())
                 .map(termsMapper::toDto);
     }
 
     @Override
     public Mono<Boolean> hasActiveSignedTerms(UUID distributorId) {
         log.info("Checking if distributor {} has active signed terms", distributorId);
-        return termsAndConditionsApi.hasActiveSignedTerms(distributorId);
+        return termsAndConditionsApi.hasActiveSignedTerms(distributorId, UUID.randomUUID().toString());
     }
 
 }

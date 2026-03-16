@@ -42,7 +42,7 @@ public class BrandingServiceImpl implements BrandingService {
         log.info("Listing brandings for distributor: {}", distributorId);
         return distributorBrandingApi
                 .filterDistributorBrandingsWithResponseSpec(
-                        distributorId, new FilterRequestDistributorBrandingDTO())
+                        distributorId, new FilterRequestDistributorBrandingDTO(), UUID.randomUUID().toString())
                 .bodyToFlux(com.firefly.core.distributor.sdk.model.DistributorBrandingDTO.class)
                 .map(this::toDTO);
     }
@@ -63,7 +63,7 @@ public class BrandingServiceImpl implements BrandingService {
         }
         // ARCH-EXCEPTION: core-common-distributor-mgmt-sdk generated client does not expose an
         // xIdempotencyKey parameter on createDistributorBranding; idempotency cannot be set at call-site.
-        return distributorBrandingApi.createDistributorBranding(distributorId, dto)
+        return distributorBrandingApi.createDistributorBranding(distributorId, dto, UUID.randomUUID().toString())
                 .map(this::toDTO)
                 .doOnNext(b -> log.info("Created branding: distributorId={}, brandingId={}",
                         distributorId, b.getId()));
@@ -72,7 +72,7 @@ public class BrandingServiceImpl implements BrandingService {
     @Override
     public Mono<BrandingDTO> getBranding(UUID distributorId, UUID brandingId) {
         log.info("Getting branding {} for distributor: {}", brandingId, distributorId);
-        return distributorBrandingApi.getDistributorBrandingById(distributorId, brandingId)
+        return distributorBrandingApi.getDistributorBrandingById(distributorId, brandingId, UUID.randomUUID().toString())
                 .map(this::toDTO);
     }
 
@@ -91,7 +91,7 @@ public class BrandingServiceImpl implements BrandingService {
         // After command, fetch updated projection from the query SDK
         // ARCH-EXCEPTION: domain-distributor-branding-sdk generated client does not expose an
         // xIdempotencyKey parameter on reviseBranding; idempotency cannot be set at call-site.
-        return brandingDistributorApi.reviseBranding(distributorId, brandingId, command)
+        return brandingDistributorApi.reviseBranding(distributorId, brandingId, command, UUID.randomUUID().toString())
                 .flatMap(result -> getBranding(distributorId, brandingId))
                 .doOnNext(b -> log.info("Updated branding: distributorId={}, brandingId={}",
                         distributorId, brandingId));
@@ -100,7 +100,7 @@ public class BrandingServiceImpl implements BrandingService {
     @Override
     public Mono<Void> deleteBranding(UUID distributorId, UUID brandingId) {
         log.info("Deleting branding {} for distributor: {}", brandingId, distributorId);
-        return distributorBrandingApi.deleteDistributorBranding(distributorId, brandingId)
+        return distributorBrandingApi.deleteDistributorBranding(distributorId, brandingId, UUID.randomUUID().toString())
                 .doOnSuccess(v -> log.info("Deleted branding: distributorId={}, brandingId={}",
                         distributorId, brandingId));
     }
@@ -112,7 +112,7 @@ public class BrandingServiceImpl implements BrandingService {
         // ARCH-EXCEPTION: domain-distributor-branding-sdk generated client does not expose an
         // xIdempotencyKey parameter on setDefaultBranding; idempotency cannot be set at call-site.
         return brandingDistributorApi.setDefaultBranding(distributorId, brandingId,
-                        new SetDefaultBrandingCommand())
+                        new SetDefaultBrandingCommand(), UUID.randomUUID().toString())
                 .flatMap(result -> getBranding(distributorId, brandingId))
                 .doOnNext(b -> log.info("Set default branding: distributorId={}, brandingId={}",
                         distributorId, brandingId));

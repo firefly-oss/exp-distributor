@@ -53,10 +53,10 @@ public class ShipmentServiceImpl implements ShipmentService {
     @Override
     public Flux<ShipmentDTO> listShipments(UUID distributorId) {
         log.info("Listing shipments for distributor: {}", distributorId);
-        return catalogDistributorApi.listCatalog(distributorId)
+        return catalogDistributorApi.listCatalog(distributorId, UUID.randomUUID().toString())
                 .filter(product -> product.getId() != null)
                 .flatMap(product ->
-                        catalogDistributorApi.trackProductShipments(distributorId, product.getId()))
+                        catalogDistributorApi.trackProductShipments(distributorId, product.getId(), UUID.randomUUID().toString()))
                 .map(sdkShipment -> {
                     ShipmentDTO dto = shipmentMapper.toCatalogShipmentDto(sdkShipment);
                     dto.setDistributorId(distributorId);
@@ -76,10 +76,10 @@ public class ShipmentServiceImpl implements ShipmentService {
         cmd.setProductId(request.getProductId());
         // ARCH-EXCEPTION: domain-distributor-catalog-sdk generated client does not expose an
         // xIdempotencyKey parameter on shipContractItem; idempotency cannot be set at call-site.
-        return catalogDistributorApi.shipContractItem(distributorId, request.getProductId(), cmd)
+        return catalogDistributorApi.shipContractItem(distributorId, request.getProductId(), cmd, UUID.randomUUID().toString())
                 .flatMap(result -> {
                     UUID shipmentId = (UUID) result;
-                    return coreShipmentApi.getShipmentById(shipmentId);
+                    return coreShipmentApi.getShipmentById(shipmentId, UUID.randomUUID().toString());
                 })
                 .map(sdkShipment -> {
                     ShipmentDTO dto = shipmentMapper.toCoreDto(sdkShipment);
@@ -91,7 +91,7 @@ public class ShipmentServiceImpl implements ShipmentService {
     @Override
     public Mono<ShipmentDTO> getShipment(UUID distributorId, UUID shipmentId) {
         log.info("Getting shipment: {}, distributor: {}", shipmentId, distributorId);
-        return coreShipmentApi.getShipmentById(shipmentId)
+        return coreShipmentApi.getShipmentById(shipmentId, UUID.randomUUID().toString())
                 .map(sdkShipment -> {
                     ShipmentDTO dto = shipmentMapper.toCoreDto(sdkShipment);
                     dto.setDistributorId(distributorId);
@@ -107,7 +107,7 @@ public class ShipmentServiceImpl implements ShipmentService {
                 shipmentMapper.toUpdateSdkDto(request);
         // ARCH-EXCEPTION: core-common-distributor-mgmt-sdk generated client does not expose an
         // xIdempotencyKey parameter on updateShipment; idempotency cannot be set at call-site.
-        return coreShipmentApi.updateShipment(shipmentId, updateCmd)
+        return coreShipmentApi.updateShipment(shipmentId, updateCmd, UUID.randomUUID().toString())
                 .map(sdkShipment -> {
                     ShipmentDTO dto = shipmentMapper.toCoreDto(sdkShipment);
                     dto.setDistributorId(distributorId);
@@ -118,7 +118,7 @@ public class ShipmentServiceImpl implements ShipmentService {
     @Override
     public Mono<Void> deleteShipment(UUID distributorId, UUID shipmentId) {
         log.info("Deleting shipment: {}, distributor: {}", shipmentId, distributorId);
-        return coreShipmentApi.deleteShipment(shipmentId);
+        return coreShipmentApi.deleteShipment(shipmentId, UUID.randomUUID().toString());
     }
 
     /**
@@ -130,7 +130,7 @@ public class ShipmentServiceImpl implements ShipmentService {
     @Override
     public Mono<ShipmentTrackingDTO> getTracking(UUID distributorId, UUID shipmentId) {
         log.info("Getting tracking for shipment: {}, distributor: {}", shipmentId, distributorId);
-        return coreShipmentApi.getShipmentById(shipmentId)
+        return coreShipmentApi.getShipmentById(shipmentId, UUID.randomUUID().toString())
                 .map(shipmentMapper::toCoreTracking);
     }
 
@@ -140,7 +140,7 @@ public class ShipmentServiceImpl implements ShipmentService {
         log.info("Updating status for shipment: {}, distributor: {}", shipmentId, distributorId);
         // ARCH-EXCEPTION: core-common-distributor-mgmt-sdk generated client does not expose an
         // xIdempotencyKey parameter on updateShipmentStatus; idempotency cannot be set at call-site.
-        return coreShipmentApi.updateShipmentStatus(shipmentId, request.getStatus(), null)
+        return coreShipmentApi.updateShipmentStatus(shipmentId, request.getStatus(), null, UUID.randomUUID().toString())
                 .map(sdkShipment -> {
                     ShipmentDTO dto = shipmentMapper.toCoreDto(sdkShipment);
                     dto.setDistributorId(distributorId);

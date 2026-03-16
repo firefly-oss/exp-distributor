@@ -21,6 +21,8 @@ import java.util.List;
 import java.util.UUID;
 
 import static org.assertj.core.api.Assertions.assertThat;
+import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
@@ -69,7 +71,7 @@ class AgentServiceImplTest {
         PaginationResponse page = new PaginationResponse();
         page.setContent(List.of(sdkAgent));
 
-        when(agentApi.listAgents(distributorId)).thenReturn(Mono.just(page));
+        when(agentApi.listAgents(eq(distributorId), any())).thenReturn(Mono.just(page));
         when(agentMapper.toDto(sdkAgent)).thenReturn(expected);
 
         StepVerifier.create(service.listAgents(distributorId))
@@ -79,7 +81,7 @@ class AgentServiceImplTest {
                 })
                 .verifyComplete();
 
-        verify(agentApi).listAgents(distributorId);
+        verify(agentApi).listAgents(eq(distributorId), any());
         verify(agentMapper).toDto(sdkAgent);
     }
 
@@ -89,12 +91,12 @@ class AgentServiceImplTest {
         PaginationResponse page = new PaginationResponse();
         page.setContent(List.of());
 
-        when(agentApi.listAgents(distributorId)).thenReturn(Mono.just(page));
+        when(agentApi.listAgents(eq(distributorId), any())).thenReturn(Mono.just(page));
 
         StepVerifier.create(service.listAgents(distributorId))
                 .verifyComplete();
 
-        verify(agentApi).listAgents(distributorId);
+        verify(agentApi).listAgents(eq(distributorId), any());
     }
 
     @Test
@@ -113,8 +115,8 @@ class AgentServiceImplTest {
         AgentDTO expected = buildAgentDTO(distributorId, agentId);
 
         when(agentMapper.toCreateCommand(request)).thenReturn(command);
-        when(agentApi.createAgent(distributorId, command)).thenReturn(Mono.just(agentId));
-        when(agentApi.getAgent(distributorId, agentId)).thenReturn(Mono.just(sdkAgent));
+        when(agentApi.createAgent(eq(distributorId), eq(command), any())).thenReturn(Mono.just(agentId));
+        when(agentApi.getAgent(eq(distributorId), eq(agentId), any())).thenReturn(Mono.just(sdkAgent));
         when(agentMapper.toDto(sdkAgent)).thenReturn(expected);
 
         StepVerifier.create(service.createAgent(distributorId, request))
@@ -125,8 +127,8 @@ class AgentServiceImplTest {
                 .verifyComplete();
 
         verify(agentMapper).toCreateCommand(request);
-        verify(agentApi).createAgent(distributorId, command);
-        verify(agentApi).getAgent(distributorId, agentId);
+        verify(agentApi).createAgent(eq(distributorId), eq(command), any());
+        verify(agentApi).getAgent(eq(distributorId), eq(agentId), any());
     }
 
     @Test
@@ -136,7 +138,7 @@ class AgentServiceImplTest {
         DistributorAgentDTO sdkAgent = buildSdkAgent(distributorId, agentId);
         AgentDTO expected = buildAgentDTO(distributorId, agentId);
 
-        when(agentApi.getAgent(distributorId, agentId)).thenReturn(Mono.just(sdkAgent));
+        when(agentApi.getAgent(eq(distributorId), eq(agentId), any())).thenReturn(Mono.just(sdkAgent));
         when(agentMapper.toDto(sdkAgent)).thenReturn(expected);
 
         StepVerifier.create(service.getAgent(distributorId, agentId))
@@ -147,7 +149,7 @@ class AgentServiceImplTest {
                 })
                 .verifyComplete();
 
-        verify(agentApi).getAgent(distributorId, agentId);
+        verify(agentApi).getAgent(eq(distributorId), eq(agentId), any());
         verify(agentMapper).toDto(sdkAgent);
     }
 
@@ -165,8 +167,8 @@ class AgentServiceImplTest {
         AgentDTO expected = buildAgentDTO(distributorId, agentId);
 
         when(agentMapper.toUpdateCommand(request)).thenReturn(command);
-        when(agentApi.updateAgent(distributorId, agentId, command)).thenReturn(Mono.just(agentId));
-        when(agentApi.getAgent(distributorId, agentId)).thenReturn(Mono.just(sdkAgent));
+        when(agentApi.updateAgent(eq(distributorId), eq(agentId), eq(command), any())).thenReturn(Mono.just(agentId));
+        when(agentApi.getAgent(eq(distributorId), eq(agentId), any())).thenReturn(Mono.just(sdkAgent));
         when(agentMapper.toDto(sdkAgent)).thenReturn(expected);
 
         StepVerifier.create(service.updateAgent(distributorId, agentId, request))
@@ -174,8 +176,8 @@ class AgentServiceImplTest {
                 .verifyComplete();
 
         verify(agentMapper).toUpdateCommand(request);
-        verify(agentApi).updateAgent(distributorId, agentId, command);
-        verify(agentApi).getAgent(distributorId, agentId);
+        verify(agentApi).updateAgent(eq(distributorId), eq(agentId), eq(command), any());
+        verify(agentApi).getAgent(eq(distributorId), eq(agentId), any());
     }
 
     @Test
@@ -183,11 +185,11 @@ class AgentServiceImplTest {
         UUID distributorId = UUID.randomUUID();
         UUID agentId = UUID.randomUUID();
 
-        when(agentApi.deleteAgent(distributorId, agentId)).thenReturn(Mono.empty());
+        when(agentApi.deleteAgent(eq(distributorId), eq(agentId), any())).thenReturn(Mono.empty());
 
         StepVerifier.create(service.deleteAgent(distributorId, agentId))
                 .verifyComplete();
 
-        verify(agentApi).deleteAgent(distributorId, agentId);
+        verify(agentApi).deleteAgent(eq(distributorId), eq(agentId), any());
     }
 }

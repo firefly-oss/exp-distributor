@@ -36,7 +36,7 @@ public class ProductServiceImpl implements ProductService {
     @Override
     public Flux<ProductDetailDTO> listProducts(UUID distributorId) {
         log.info("Listing products for distributor: {}", distributorId);
-        return catalogDistributorApi.listCatalog(distributorId)
+        return catalogDistributorApi.listCatalog(distributorId, UUID.randomUUID().toString())
                 .map(productMapper::fromCatalogDto);
     }
 
@@ -47,14 +47,14 @@ public class ProductServiceImpl implements ProductService {
         RegisterProductCommand cmd = new RegisterProductCommand();
         // ARCH-EXCEPTION: domain-distributor-catalog-sdk generated client does not expose an
         // xIdempotencyKey parameter on registerProduct; idempotency cannot be set at call-site.
-        return catalogDistributorApi.registerProduct(distributorId, cmd)
+        return catalogDistributorApi.registerProduct(distributorId, cmd, UUID.randomUUID().toString())
                 .map(result -> (UUID) result);
     }
 
     @Override
     public Mono<ProductDetailDTO> getProduct(UUID distributorId, UUID productId) {
         log.info("Getting product {} for distributor: {}", productId, distributorId);
-        return productsApi.getProductInfo(productId)
+        return productsApi.getProductInfo(productId, UUID.randomUUID().toString())
                 .map(productMapper::toDto);
     }
 
@@ -65,7 +65,7 @@ public class ProductServiceImpl implements ProductService {
         UpdateProductCommand cmd = new UpdateProductCommand();
         // ARCH-EXCEPTION: domain-distributor-catalog-sdk generated client does not expose an
         // xIdempotencyKey parameter on reviseProduct; idempotency cannot be set at call-site.
-        return catalogDistributorApi.reviseProduct(distributorId, productId, cmd)
+        return catalogDistributorApi.reviseProduct(distributorId, productId, cmd, UUID.randomUUID().toString())
                 .map(result -> (UUID) result);
     }
 
@@ -73,13 +73,13 @@ public class ProductServiceImpl implements ProductService {
     public Mono<Void> removeProduct(UUID distributorId, UUID productId) {
         log.info("Removing product {} for distributor: {}", productId, distributorId);
         UpdateProductInfoCommand cmd = new UpdateProductInfoCommand();
-        return catalogDistributorApi.retireProduct(distributorId, productId, cmd).then();
+        return catalogDistributorApi.retireProduct(distributorId, productId, cmd, UUID.randomUUID().toString()).then();
     }
 
     @Override
     public Flux<ProductDetailDTO> listActiveProducts(UUID distributorId) {
         log.info("Listing active products for distributor: {}", distributorId);
-        return catalogDistributorApi.listCatalog(distributorId)
+        return catalogDistributorApi.listCatalog(distributorId, UUID.randomUUID().toString())
                 .filter(p -> Boolean.TRUE.equals(p.getIsActive()))
                 .map(productMapper::fromCatalogDto);
     }

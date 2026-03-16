@@ -66,7 +66,7 @@ class ProductServiceImplTest {
         ProductDTO sdkProduct = buildCatalogProductDTO(productId, distributorId, true);
         ProductDetailDTO expected = buildProductDetailDTO(productId, distributorId);
 
-        when(catalogDistributorApi.listCatalog(distributorId)).thenReturn(Flux.just(sdkProduct));
+        when(catalogDistributorApi.listCatalog(eq(distributorId), any())).thenReturn(Flux.just(sdkProduct));
         when(productMapper.fromCatalogDto(sdkProduct)).thenReturn(expected);
 
         StepVerifier.create(service.listProducts(distributorId))
@@ -76,7 +76,7 @@ class ProductServiceImplTest {
                 })
                 .verifyComplete();
 
-        verify(catalogDistributorApi).listCatalog(distributorId);
+        verify(catalogDistributorApi).listCatalog(eq(distributorId), any());
     }
 
     @Test
@@ -88,14 +88,14 @@ class ProductServiceImplTest {
                 .category("Electronics")
                 .build();
 
-        when(catalogDistributorApi.registerProduct(eq(distributorId), any()))
+        when(catalogDistributorApi.registerProduct(eq(distributorId), any(), any()))
                 .thenReturn(Mono.just(newId));
 
         StepVerifier.create(service.registerProduct(distributorId, request))
                 .assertNext(id -> assertThat(id).isEqualTo(newId))
                 .verifyComplete();
 
-        verify(catalogDistributorApi).registerProduct(eq(distributorId), any());
+        verify(catalogDistributorApi).registerProduct(eq(distributorId), any(), any());
     }
 
     @Test
@@ -106,14 +106,14 @@ class ProductServiceImplTest {
                 new com.firefly.domain.product.catalog.sdk.model.ProductDTO();
         ProductDetailDTO expected = buildProductDetailDTO(productId, distributorId);
 
-        when(productsApi.getProductInfo(productId)).thenReturn(Mono.just(sdkDto));
+        when(productsApi.getProductInfo(eq(productId), any())).thenReturn(Mono.just(sdkDto));
         when(productMapper.toDto(sdkDto)).thenReturn(expected);
 
         StepVerifier.create(service.getProduct(distributorId, productId))
                 .assertNext(dto -> assertThat(dto.getId()).isEqualTo(productId))
                 .verifyComplete();
 
-        verify(productsApi).getProductInfo(productId);
+        verify(productsApi).getProductInfo(eq(productId), any());
     }
 
     @Test
@@ -125,14 +125,14 @@ class ProductServiceImplTest {
                 .isActive(true)
                 .build();
 
-        when(catalogDistributorApi.reviseProduct(eq(distributorId), eq(productId), any()))
+        when(catalogDistributorApi.reviseProduct(eq(distributorId), eq(productId), any(), any()))
                 .thenReturn(Mono.just(productId));
 
         StepVerifier.create(service.updateProduct(distributorId, productId, request))
                 .assertNext(id -> assertThat(id).isEqualTo(productId))
                 .verifyComplete();
 
-        verify(catalogDistributorApi).reviseProduct(eq(distributorId), eq(productId), any());
+        verify(catalogDistributorApi).reviseProduct(eq(distributorId), eq(productId), any(), any());
     }
 
     @Test
@@ -140,13 +140,13 @@ class ProductServiceImplTest {
         UUID distributorId = UUID.randomUUID();
         UUID productId = UUID.randomUUID();
 
-        when(catalogDistributorApi.retireProduct(eq(distributorId), eq(productId), any()))
+        when(catalogDistributorApi.retireProduct(eq(distributorId), eq(productId), any(), any()))
                 .thenReturn(Mono.just(productId));
 
         StepVerifier.create(service.removeProduct(distributorId, productId))
                 .verifyComplete();
 
-        verify(catalogDistributorApi).retireProduct(eq(distributorId), eq(productId), any());
+        verify(catalogDistributorApi).retireProduct(eq(distributorId), eq(productId), any(), any());
     }
 
     @Test
@@ -159,7 +159,7 @@ class ProductServiceImplTest {
         ProductDTO inactive = buildCatalogProductDTO(inactiveId, distributorId, false);
         ProductDetailDTO expectedDto = buildProductDetailDTO(activeId, distributorId);
 
-        when(catalogDistributorApi.listCatalog(distributorId)).thenReturn(Flux.just(active, inactive));
+        when(catalogDistributorApi.listCatalog(eq(distributorId), any())).thenReturn(Flux.just(active, inactive));
         when(productMapper.fromCatalogDto(active)).thenReturn(expectedDto);
 
         StepVerifier.create(service.listActiveProducts(distributorId))

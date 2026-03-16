@@ -32,7 +32,7 @@ public class CatalogServiceImpl implements CatalogService {
     @Override
     public Flux<CatalogItemDTO> listCatalog(UUID distributorId) {
         log.info("Listing catalog items for distributor: {}", distributorId);
-        return catalogDistributorApi.listCatalog(distributorId)
+        return catalogDistributorApi.listCatalog(distributorId, UUID.randomUUID().toString())
                 .map(catalogMapper::toDto);
     }
 
@@ -44,14 +44,14 @@ public class CatalogServiceImpl implements CatalogService {
         // RegisterProductCommand is a composite command; set available sub-fields as needed
         // ARCH-EXCEPTION: domain-distributor-catalog-sdk generated client does not expose an
         // xIdempotencyKey parameter on registerProduct; idempotency cannot be set at call-site.
-        return catalogDistributorApi.registerProduct(distributorId, cmd)
+        return catalogDistributorApi.registerProduct(distributorId, cmd, UUID.randomUUID().toString())
                 .map(result -> (UUID) result);
     }
 
     @Override
     public Mono<CatalogItemDTO> getCatalogItem(UUID distributorId, UUID catalogItemId) {
         log.info("Getting catalog item {} for distributor: {}", catalogItemId, distributorId);
-        return catalogDistributorApi.listCatalog(distributorId)
+        return catalogDistributorApi.listCatalog(distributorId, UUID.randomUUID().toString())
                 .filter(p -> catalogItemId.equals(p.getId()))
                 .next()
                 .map(catalogMapper::toDto);
@@ -65,7 +65,7 @@ public class CatalogServiceImpl implements CatalogService {
         // UpdateProductCommand is a composite command; set available sub-fields as needed
         // ARCH-EXCEPTION: domain-distributor-catalog-sdk generated client does not expose an
         // xIdempotencyKey parameter on reviseProduct; idempotency cannot be set at call-site.
-        return catalogDistributorApi.reviseProduct(distributorId, catalogItemId, cmd)
+        return catalogDistributorApi.reviseProduct(distributorId, catalogItemId, cmd, UUID.randomUUID().toString())
                 .map(result -> (UUID) result);
     }
 
@@ -76,7 +76,7 @@ public class CatalogServiceImpl implements CatalogService {
         UpdateProductInfoCommand cmd = new UpdateProductInfoCommand();
         // ARCH-EXCEPTION: domain-distributor-catalog-sdk generated client does not expose an
         // xIdempotencyKey parameter on retireProduct; idempotency cannot be set at call-site.
-        return catalogDistributorApi.retireProduct(distributorId, catalogItemId, cmd)
+        return catalogDistributorApi.retireProduct(distributorId, catalogItemId, cmd, UUID.randomUUID().toString())
                 .map(result -> (UUID) result);
     }
 

@@ -31,20 +31,20 @@ public class TerritoryServiceImpl implements TerritoryService {
 
         // ARCH-EXCEPTION: domain-distributor-branding-sdk generated client does not expose an
         // xIdempotencyKey parameter on createTerritory; idempotency cannot be set at call-site.
-        return territoryApi.createTerritory(distributorId, command);
+        return territoryApi.createTerritory(distributorId, command, UUID.randomUUID().toString());
     }
 
     @Override
     public Mono<TerritoryDTO> getTerritory(UUID distributorId, UUID territoryId) {
         log.info("Getting territory {} for distributor: {}", territoryId, distributorId);
-        return territoryApi.getTerritory(distributorId, territoryId)
+        return territoryApi.getTerritory(distributorId, territoryId, UUID.randomUUID().toString())
                 .map(territoryMapper::toDto);
     }
 
     @Override
     public Mono<PaginationResponse> listTerritories(UUID distributorId) {
         log.info("Listing territories for distributor: {}", distributorId);
-        return territoryApi.listTerritories(distributorId);
+        return territoryApi.listTerritories(distributorId, UUID.randomUUID().toString());
     }
 
     @Override
@@ -55,12 +55,12 @@ public class TerritoryServiceImpl implements TerritoryService {
 
         // ARCH-EXCEPTION: domain-distributor-branding-sdk generated client does not expose an
         // xIdempotencyKey parameter on updateTerritory; idempotency cannot be set at call-site.
-        return territoryApi.updateTerritory(distributorId, territoryId, command);
+        return territoryApi.updateTerritory(distributorId, territoryId, command, UUID.randomUUID().toString());
     }
 
     @Override
     public Mono<Void> deleteTerritory(UUID distributorId, UUID territoryId) {
         log.info("Deleting territory {} for distributor: {}", territoryId, distributorId);
-        return territoryApi.deleteTerritory(distributorId, territoryId);
+        return territoryApi.deleteTerritory(distributorId, territoryId, UUID.randomUUID().toString());
     }
 }

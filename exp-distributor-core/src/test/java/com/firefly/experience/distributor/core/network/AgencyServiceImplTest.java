@@ -20,6 +20,8 @@ import reactor.test.StepVerifier;
 import java.util.UUID;
 
 import static org.assertj.core.api.Assertions.assertThat;
+import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
@@ -75,14 +77,14 @@ class AgencyServiceImplTest {
         CreateAgencyCommand command = new CreateAgencyCommand();
 
         when(agencyMapper.toCreateCommand(request)).thenReturn(command);
-        when(agencyApi.createAgency(distributorId, command)).thenReturn(Mono.just(agencyId));
+        when(agencyApi.createAgency(eq(distributorId), eq(command), any())).thenReturn(Mono.just(agencyId));
 
         StepVerifier.create(service.createAgency(distributorId, request))
                 .assertNext(id -> assertThat(id).isEqualTo(agencyId))
                 .verifyComplete();
 
         verify(agencyMapper).toCreateCommand(request);
-        verify(agencyApi).createAgency(distributorId, command);
+        verify(agencyApi).createAgency(eq(distributorId), eq(command), any());
     }
 
     @Test
@@ -92,7 +94,7 @@ class AgencyServiceImplTest {
         DistributorAgencyDTO sdkDto = buildSdkAgency(distributorId, agencyId);
         AgencyDTO expected = buildAgencyDTO(distributorId, agencyId);
 
-        when(agencyApi.getAgency(distributorId, agencyId)).thenReturn(Mono.just(sdkDto));
+        when(agencyApi.getAgency(eq(distributorId), eq(agencyId), any())).thenReturn(Mono.just(sdkDto));
         when(agencyMapper.toDto(sdkDto)).thenReturn(expected);
 
         StepVerifier.create(service.getAgency(distributorId, agencyId))
@@ -104,7 +106,7 @@ class AgencyServiceImplTest {
                 })
                 .verifyComplete();
 
-        verify(agencyApi).getAgency(distributorId, agencyId);
+        verify(agencyApi).getAgency(eq(distributorId), eq(agencyId), any());
         verify(agencyMapper).toDto(sdkDto);
     }
 
@@ -113,13 +115,13 @@ class AgencyServiceImplTest {
         UUID distributorId = UUID.randomUUID();
         PaginationResponse response = new PaginationResponse();
 
-        when(agencyApi.listAgencies(distributorId)).thenReturn(Mono.just(response));
+        when(agencyApi.listAgencies(eq(distributorId), any())).thenReturn(Mono.just(response));
 
         StepVerifier.create(service.listAgencies(distributorId))
                 .assertNext(r -> assertThat(r).isSameAs(response))
                 .verifyComplete();
 
-        verify(agencyApi).listAgencies(distributorId);
+        verify(agencyApi).listAgencies(eq(distributorId), any());
     }
 
     @Test
@@ -134,14 +136,14 @@ class AgencyServiceImplTest {
         UpdateAgencyCommand command = new UpdateAgencyCommand();
 
         when(agencyMapper.toUpdateCommand(request)).thenReturn(command);
-        when(agencyApi.updateAgency(distributorId, agencyId, command)).thenReturn(Mono.just(agencyId));
+        when(agencyApi.updateAgency(eq(distributorId), eq(agencyId), eq(command), any())).thenReturn(Mono.just(agencyId));
 
         StepVerifier.create(service.updateAgency(distributorId, agencyId, request))
                 .assertNext(id -> assertThat(id).isEqualTo(agencyId))
                 .verifyComplete();
 
         verify(agencyMapper).toUpdateCommand(request);
-        verify(agencyApi).updateAgency(distributorId, agencyId, command);
+        verify(agencyApi).updateAgency(eq(distributorId), eq(agencyId), eq(command), any());
     }
 
     @Test
@@ -149,11 +151,11 @@ class AgencyServiceImplTest {
         UUID distributorId = UUID.randomUUID();
         UUID agencyId = UUID.randomUUID();
 
-        when(agencyApi.deleteAgency(distributorId, agencyId)).thenReturn(Mono.empty());
+        when(agencyApi.deleteAgency(eq(distributorId), eq(agencyId), any())).thenReturn(Mono.empty());
 
         StepVerifier.create(service.deleteAgency(distributorId, agencyId))
                 .verifyComplete();
 
-        verify(agencyApi).deleteAgency(distributorId, agencyId);
+        verify(agencyApi).deleteAgency(eq(distributorId), eq(agencyId), any());
     }
 }

@@ -27,13 +27,13 @@ public class SimulationServiceImpl implements SimulationService {
         command.setDistributorId(distributorId);
         // ARCH-EXCEPTION: domain-distributor-catalog-sdk generated client does not expose an
         // xIdempotencyKey parameter on createSimulation; idempotency cannot be set at call-site.
-        return simulationsApi.createSimulation(distributorId, command);
+        return simulationsApi.createSimulation(distributorId, command, UUID.randomUUID().toString());
     }
 
     @Override
     public Mono<SimulationResultDTO> getSimulation(UUID distributorId, UUID simulationId) {
         log.info("Getting simulation {} for distributor: {}", simulationId, distributorId);
-        return simulationsApi.getSimulation(distributorId, simulationId)
+        return simulationsApi.getSimulation(distributorId, simulationId, UUID.randomUUID().toString())
                 .map(simulationMapper::toDto);
     }
 }

@@ -60,7 +60,7 @@ class OperationsServiceImplTest {
         DistributorOperationDTO sdkDto = buildSdkOperation(distributorId, operationId);
         OperationDTO expected = buildOperationDTO(distributorId, operationId);
 
-        when(operationApi.listOperations(distributorId)).thenReturn(Mono.just(sdkDto));
+        when(operationApi.listOperations(eq(distributorId), any())).thenReturn(Mono.just(sdkDto));
         when(operationMapper.toDto(sdkDto)).thenReturn(expected);
 
         StepVerifier.create(service.listOperations(distributorId))
@@ -71,19 +71,19 @@ class OperationsServiceImplTest {
                 })
                 .verifyComplete();
 
-        verify(operationApi).listOperations(distributorId);
+        verify(operationApi).listOperations(eq(distributorId), any());
         verify(operationMapper).toDto(sdkDto);
     }
 
     @Test
     void listOperations_whenApiReturnsEmpty_shouldCompleteWithNoElements() {
         UUID distributorId = UUID.randomUUID();
-        when(operationApi.listOperations(distributorId)).thenReturn(Mono.empty());
+        when(operationApi.listOperations(eq(distributorId), any())).thenReturn(Mono.empty());
 
         StepVerifier.create(service.listOperations(distributorId))
                 .verifyComplete();
 
-        verify(operationApi).listOperations(distributorId);
+        verify(operationApi).listOperations(eq(distributorId), any());
     }
 
     @Test
@@ -99,8 +99,8 @@ class OperationsServiceImplTest {
         OperationDTO expected = buildOperationDTO(distributorId, operationId);
 
         when(operationMapper.toCreateCommand(request)).thenReturn(command);
-        when(operationApi.createOperation(distributorId, command)).thenReturn(Mono.just(operationId));
-        when(operationApi.getOperation(distributorId, operationId)).thenReturn(Mono.just(sdkDto));
+        when(operationApi.createOperation(eq(distributorId), eq(command), any())).thenReturn(Mono.just(operationId));
+        when(operationApi.getOperation(eq(distributorId), eq(operationId), any())).thenReturn(Mono.just(sdkDto));
         when(operationMapper.toDto(sdkDto)).thenReturn(expected);
 
         StepVerifier.create(service.createOperation(distributorId, request))
@@ -111,8 +111,8 @@ class OperationsServiceImplTest {
                 .verifyComplete();
 
         verify(operationMapper).toCreateCommand(request);
-        verify(operationApi).createOperation(distributorId, command);
-        verify(operationApi).getOperation(distributorId, operationId);
+        verify(operationApi).createOperation(eq(distributorId), eq(command), any());
+        verify(operationApi).getOperation(eq(distributorId), eq(operationId), any());
         verify(operationMapper).toDto(sdkDto);
     }
 
@@ -129,8 +129,8 @@ class OperationsServiceImplTest {
         OperationDTO expected = buildOperationDTO(distributorId, operationId);
 
         when(operationMapper.toUpdateCommand(request)).thenReturn(command);
-        when(operationApi.updateOperation(distributorId, operationId, command)).thenReturn(Mono.just(operationId));
-        when(operationApi.getOperation(distributorId, operationId)).thenReturn(Mono.just(sdkDto));
+        when(operationApi.updateOperation(eq(distributorId), eq(operationId), eq(command), any())).thenReturn(Mono.just(operationId));
+        when(operationApi.getOperation(eq(distributorId), eq(operationId), any())).thenReturn(Mono.just(sdkDto));
         when(operationMapper.toDto(sdkDto)).thenReturn(expected);
 
         StepVerifier.create(service.updateOperation(distributorId, operationId, request))
@@ -138,8 +138,8 @@ class OperationsServiceImplTest {
                 .verifyComplete();
 
         verify(operationMapper).toUpdateCommand(request);
-        verify(operationApi).updateOperation(distributorId, operationId, command);
-        verify(operationApi).getOperation(distributorId, operationId);
+        verify(operationApi).updateOperation(eq(distributorId), eq(operationId), eq(command), any());
+        verify(operationApi).getOperation(eq(distributorId), eq(operationId), any());
     }
 
     @Test
@@ -147,12 +147,12 @@ class OperationsServiceImplTest {
         UUID distributorId = UUID.randomUUID();
         UUID operationId = UUID.randomUUID();
 
-        when(operationApi.deleteOperation(distributorId, operationId)).thenReturn(Mono.empty());
+        when(operationApi.deleteOperation(eq(distributorId), eq(operationId), any())).thenReturn(Mono.empty());
 
         StepVerifier.create(service.deleteOperation(distributorId, operationId))
                 .verifyComplete();
 
-        verify(operationApi).deleteOperation(distributorId, operationId);
+        verify(operationApi).deleteOperation(eq(distributorId), eq(operationId), any());
     }
 
     @Test
@@ -163,7 +163,7 @@ class OperationsServiceImplTest {
         OperationDTO expected = buildOperationDTO(distributorId, operationId);
 
         // The impl passes UUID.randomUUID() as idempotency key — match with any(UUID.class)
-        when(operationApi.activateOperation(eq(distributorId), eq(operationId), any(UUID.class)))
+        when(operationApi.activateOperation(eq(distributorId), eq(operationId), any(UUID.class), any()))
                 .thenReturn(Mono.just(sdkDto));
         when(operationMapper.toDto(sdkDto)).thenReturn(expected);
 
@@ -174,7 +174,7 @@ class OperationsServiceImplTest {
                 })
                 .verifyComplete();
 
-        verify(operationApi).activateOperation(eq(distributorId), eq(operationId), any(UUID.class));
+        verify(operationApi).activateOperation(eq(distributorId), eq(operationId), any(UUID.class), any());
         verify(operationMapper).toDto(sdkDto);
     }
 
@@ -185,7 +185,7 @@ class OperationsServiceImplTest {
         DistributorOperationDTO sdkDto = buildSdkOperation(distributorId, operationId);
         OperationDTO expected = buildOperationDTO(distributorId, operationId);
 
-        when(operationApi.deactivateOperation(eq(distributorId), eq(operationId), any(UUID.class)))
+        when(operationApi.deactivateOperation(eq(distributorId), eq(operationId), any(UUID.class), any()))
                 .thenReturn(Mono.just(sdkDto));
         when(operationMapper.toDto(sdkDto)).thenReturn(expected);
 
@@ -193,20 +193,20 @@ class OperationsServiceImplTest {
                 .assertNext(dto -> assertThat(dto.getId()).isEqualTo(operationId))
                 .verifyComplete();
 
-        verify(operationApi).deactivateOperation(eq(distributorId), eq(operationId), any(UUID.class));
+        verify(operationApi).deactivateOperation(eq(distributorId), eq(operationId), any(UUID.class), any());
     }
 
     @Test
     void canOperate_shouldDelegateToApiAndReturnBoolean() {
         UUID distributorId = UUID.randomUUID();
 
-        when(operationApi.canOperate(distributorId, distributorId, distributorId))
+        when(operationApi.canOperate(eq(distributorId), eq(distributorId), eq(distributorId), any()))
                 .thenReturn(Mono.just(true));
 
         StepVerifier.create(service.canOperate(distributorId))
                 .assertNext(result -> assertThat(result).isTrue())
                 .verifyComplete();
 
-        verify(operationApi).canOperate(distributorId, distributorId, distributorId);
+        verify(operationApi).canOperate(eq(distributorId), eq(distributorId), eq(distributorId), any());
     }
 }

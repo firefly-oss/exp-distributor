@@ -69,7 +69,7 @@ class TermsAndConditionsServiceImplTest {
         DistributorTermsAndConditionsDTO sdkDto = buildSdkDto(tcId, distributorId);
         TermsDTO expectedDto = buildTermsDTO(tcId, distributorId);
 
-        when(termsAndConditionsApi.listTermsAndConditions(distributorId)).thenReturn(Mono.just(sdkDto));
+        when(termsAndConditionsApi.listTermsAndConditions(eq(distributorId), any())).thenReturn(Mono.just(sdkDto));
         when(termsMapper.toDto(sdkDto)).thenReturn(expectedDto);
 
         StepVerifier.create(service.listTerms(distributorId))
@@ -80,7 +80,7 @@ class TermsAndConditionsServiceImplTest {
                 })
                 .verifyComplete();
 
-        verify(termsAndConditionsApi).listTermsAndConditions(distributorId);
+        verify(termsAndConditionsApi).listTermsAndConditions(eq(distributorId), any());
     }
 
     // ── getActiveTerms ────────────────────────────────────────────────────────
@@ -94,7 +94,7 @@ class TermsAndConditionsServiceImplTest {
         TermsDTO expectedDto = buildTermsDTO(tcId, distributorId);
         expectedDto.setStatus("ACTIVE");
 
-        when(termsAndConditionsApi.getActiveTermsAndConditions(distributorId)).thenReturn(Mono.just(sdkDto));
+        when(termsAndConditionsApi.getActiveTermsAndConditions(eq(distributorId), any())).thenReturn(Mono.just(sdkDto));
         when(termsMapper.toDto(sdkDto)).thenReturn(expectedDto);
 
         StepVerifier.create(service.getActiveTerms(distributorId))
@@ -104,7 +104,7 @@ class TermsAndConditionsServiceImplTest {
                 })
                 .verifyComplete();
 
-        verify(termsAndConditionsApi).getActiveTermsAndConditions(distributorId);
+        verify(termsAndConditionsApi).getActiveTermsAndConditions(eq(distributorId), any());
     }
 
     // ── getLatestTerms ────────────────────────────────────────────────────────
@@ -116,7 +116,7 @@ class TermsAndConditionsServiceImplTest {
         DistributorTermsAndConditionsDTO sdkDto = buildSdkDto(tcId, distributorId);
         TermsDTO expectedDto = buildTermsDTO(tcId, distributorId);
 
-        when(termsAndConditionsApi.getLatestTermsAndConditions(distributorId)).thenReturn(Mono.just(sdkDto));
+        when(termsAndConditionsApi.getLatestTermsAndConditions(eq(distributorId), any())).thenReturn(Mono.just(sdkDto));
         when(termsMapper.toDto(sdkDto)).thenReturn(expectedDto);
 
         StepVerifier.create(service.getLatestTerms(distributorId))
@@ -126,7 +126,7 @@ class TermsAndConditionsServiceImplTest {
                 })
                 .verifyComplete();
 
-        verify(termsAndConditionsApi).getLatestTermsAndConditions(distributorId);
+        verify(termsAndConditionsApi).getLatestTermsAndConditions(eq(distributorId), any());
     }
 
     // ── createTerms ───────────────────────────────────────────────────────────
@@ -146,9 +146,9 @@ class TermsAndConditionsServiceImplTest {
         TermsDTO expectedDto = buildTermsDTO(newTcId, distributorId);
 
         when(termsMapper.toCreateCommand(request)).thenReturn(command);
-        when(termsAndConditionsApi.createTermsAndConditions(distributorId, command))
+        when(termsAndConditionsApi.createTermsAndConditions(eq(distributorId), eq(command), any()))
                 .thenReturn(Mono.just(newTcId));
-        when(termsAndConditionsApi.getTermsAndConditionsDetail(distributorId, newTcId))
+        when(termsAndConditionsApi.getTermsAndConditionsDetail(eq(distributorId), eq(newTcId), any()))
                 .thenReturn(Mono.just(sdkDto));
         when(termsMapper.toDto(sdkDto)).thenReturn(expectedDto);
 
@@ -159,8 +159,8 @@ class TermsAndConditionsServiceImplTest {
                 })
                 .verifyComplete();
 
-        verify(termsAndConditionsApi).createTermsAndConditions(distributorId, command);
-        verify(termsAndConditionsApi).getTermsAndConditionsDetail(distributorId, newTcId);
+        verify(termsAndConditionsApi).createTermsAndConditions(eq(distributorId), eq(command), any());
+        verify(termsAndConditionsApi).getTermsAndConditionsDetail(eq(distributorId), eq(newTcId), any());
     }
 
     // ── getTermsDetail ────────────────────────────────────────────────────────
@@ -172,7 +172,7 @@ class TermsAndConditionsServiceImplTest {
         DistributorTermsAndConditionsDTO sdkDto = buildSdkDto(tcId, distributorId);
         TermsDTO expectedDto = buildTermsDTO(tcId, distributorId);
 
-        when(termsAndConditionsApi.getTermsAndConditionsDetail(distributorId, tcId))
+        when(termsAndConditionsApi.getTermsAndConditionsDetail(eq(distributorId), eq(tcId), any()))
                 .thenReturn(Mono.just(sdkDto));
         when(termsMapper.toDto(sdkDto)).thenReturn(expectedDto);
 
@@ -183,7 +183,7 @@ class TermsAndConditionsServiceImplTest {
                 })
                 .verifyComplete();
 
-        verify(termsAndConditionsApi).getTermsAndConditionsDetail(distributorId, tcId);
+        verify(termsAndConditionsApi).getTermsAndConditionsDetail(eq(distributorId), eq(tcId), any());
     }
 
     // ── updateTerms ───────────────────────────────────────────────────────────
@@ -205,11 +205,11 @@ class TermsAndConditionsServiceImplTest {
         expectedDto.setVersion("2.0");
 
         when(termsMapper.toUpdateCommand(request)).thenReturn(command);
-        when(termsAndConditionsApi.deleteTermsAndConditions(distributorId, oldTcId))
+        when(termsAndConditionsApi.deleteTermsAndConditions(eq(distributorId), eq(oldTcId), any()))
                 .thenReturn(Mono.empty());
-        when(termsAndConditionsApi.createTermsAndConditions(distributorId, command))
+        when(termsAndConditionsApi.createTermsAndConditions(eq(distributorId), eq(command), any()))
                 .thenReturn(Mono.just(newTcId));
-        when(termsAndConditionsApi.getTermsAndConditionsDetail(distributorId, newTcId))
+        when(termsAndConditionsApi.getTermsAndConditionsDetail(eq(distributorId), eq(newTcId), any()))
                 .thenReturn(Mono.just(sdkDto));
         when(termsMapper.toDto(sdkDto)).thenReturn(expectedDto);
 
@@ -220,9 +220,9 @@ class TermsAndConditionsServiceImplTest {
                 })
                 .verifyComplete();
 
-        verify(termsAndConditionsApi).deleteTermsAndConditions(distributorId, oldTcId);
-        verify(termsAndConditionsApi).createTermsAndConditions(distributorId, command);
-        verify(termsAndConditionsApi).getTermsAndConditionsDetail(distributorId, newTcId);
+        verify(termsAndConditionsApi).deleteTermsAndConditions(eq(distributorId), eq(oldTcId), any());
+        verify(termsAndConditionsApi).createTermsAndConditions(eq(distributorId), eq(command), any());
+        verify(termsAndConditionsApi).getTermsAndConditionsDetail(eq(distributorId), eq(newTcId), any());
     }
 
     // ── deleteTerms ───────────────────────────────────────────────────────────
@@ -232,13 +232,13 @@ class TermsAndConditionsServiceImplTest {
         UUID distributorId = UUID.randomUUID();
         UUID tcId = UUID.randomUUID();
 
-        when(termsAndConditionsApi.deleteTermsAndConditions(distributorId, tcId))
+        when(termsAndConditionsApi.deleteTermsAndConditions(eq(distributorId), eq(tcId), any()))
                 .thenReturn(Mono.empty());
 
         StepVerifier.create(service.deleteTerms(distributorId, tcId))
                 .verifyComplete();
 
-        verify(termsAndConditionsApi).deleteTermsAndConditions(distributorId, tcId);
+        verify(termsAndConditionsApi).deleteTermsAndConditions(eq(distributorId), eq(tcId), any());
     }
 
     // ── signTerms ─────────────────────────────────────────────────────────────
@@ -253,7 +253,7 @@ class TermsAndConditionsServiceImplTest {
         expectedDto.setStatus("SIGNED");
         expectedDto.setSignedDate(LocalDateTime.now());
 
-        when(termsAndConditionsApi.signTermsAndConditions(eq(distributorId), eq(tcId), any(UUID.class)))
+        when(termsAndConditionsApi.signTermsAndConditions(eq(distributorId), eq(tcId), any(UUID.class), any()))
                 .thenReturn(Mono.just(sdkDto));
         when(termsMapper.toDto(sdkDto)).thenReturn(expectedDto);
 
@@ -265,7 +265,7 @@ class TermsAndConditionsServiceImplTest {
                 })
                 .verifyComplete();
 
-        verify(termsAndConditionsApi).signTermsAndConditions(eq(distributorId), eq(tcId), any(UUID.class));
+        verify(termsAndConditionsApi).signTermsAndConditions(eq(distributorId), eq(tcId), any(UUID.class), any());
     }
 
     // ── activateTerms ─────────────────────────────────────────────────────────
@@ -279,7 +279,7 @@ class TermsAndConditionsServiceImplTest {
         TermsDTO expectedDto = buildTermsDTO(tcId, distributorId);
         expectedDto.setStatus("ACTIVE");
 
-        when(termsAndConditionsApi.activateTermsAndConditions(eq(distributorId), eq(tcId), any(UUID.class)))
+        when(termsAndConditionsApi.activateTermsAndConditions(eq(distributorId), eq(tcId), any(UUID.class), any()))
                 .thenReturn(Mono.just(sdkDto));
         when(termsMapper.toDto(sdkDto)).thenReturn(expectedDto);
 
@@ -290,7 +290,7 @@ class TermsAndConditionsServiceImplTest {
                 })
                 .verifyComplete();
 
-        verify(termsAndConditionsApi).activateTermsAndConditions(eq(distributorId), eq(tcId), any(UUID.class));
+        verify(termsAndConditionsApi).activateTermsAndConditions(eq(distributorId), eq(tcId), any(UUID.class), any());
     }
 
     // ── deactivateTerms ───────────────────────────────────────────────────────
@@ -304,7 +304,7 @@ class TermsAndConditionsServiceImplTest {
         TermsDTO expectedDto = buildTermsDTO(tcId, distributorId);
         expectedDto.setIsActive(false);
 
-        when(termsAndConditionsApi.deactivateTermsAndConditions(eq(distributorId), eq(tcId), any(UUID.class)))
+        when(termsAndConditionsApi.deactivateTermsAndConditions(eq(distributorId), eq(tcId), any(UUID.class), any()))
                 .thenReturn(Mono.just(sdkDto));
         when(termsMapper.toDto(sdkDto)).thenReturn(expectedDto);
 
@@ -315,7 +315,7 @@ class TermsAndConditionsServiceImplTest {
                 })
                 .verifyComplete();
 
-        verify(termsAndConditionsApi).deactivateTermsAndConditions(eq(distributorId), eq(tcId), any(UUID.class));
+        verify(termsAndConditionsApi).deactivateTermsAndConditions(eq(distributorId), eq(tcId), any(UUID.class), any());
     }
 
     // ── hasActiveSignedTerms ──────────────────────────────────────────────────
@@ -324,21 +324,21 @@ class TermsAndConditionsServiceImplTest {
     void hasActiveSignedTerms_shouldReturnTrueWhenApiReturnsTrue() {
         UUID distributorId = UUID.randomUUID();
 
-        when(termsAndConditionsApi.hasActiveSignedTerms(distributorId))
+        when(termsAndConditionsApi.hasActiveSignedTerms(eq(distributorId), any()))
                 .thenReturn(Mono.just(true));
 
         StepVerifier.create(service.hasActiveSignedTerms(distributorId))
                 .assertNext(result -> assertThat(result).isTrue())
                 .verifyComplete();
 
-        verify(termsAndConditionsApi).hasActiveSignedTerms(distributorId);
+        verify(termsAndConditionsApi).hasActiveSignedTerms(eq(distributorId), any());
     }
 
     @Test
     void hasActiveSignedTerms_shouldReturnFalseWhenApiReturnsFalse() {
         UUID distributorId = UUID.randomUUID();
 
-        when(termsAndConditionsApi.hasActiveSignedTerms(distributorId))
+        when(termsAndConditionsApi.hasActiveSignedTerms(eq(distributorId), any()))
                 .thenReturn(Mono.just(false));
 
         StepVerifier.create(service.hasActiveSignedTerms(distributorId))

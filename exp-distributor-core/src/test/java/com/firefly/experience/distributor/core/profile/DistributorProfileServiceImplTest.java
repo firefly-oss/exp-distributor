@@ -55,7 +55,7 @@ class DistributorProfileServiceImplTest {
                 .taxId("US-TAX-001")
                 .build();
 
-        when(brandingDistributorApi.onboardDistributor(any(RegisterDistributorCommand.class)))
+        when(brandingDistributorApi.onboardDistributor(any(RegisterDistributorCommand.class), any()))
                 .thenReturn(Mono.just(distributorId));
 
         StepVerifier.create(service.registerDistributor(request))
@@ -67,7 +67,7 @@ class DistributorProfileServiceImplTest {
                 })
                 .verifyComplete();
 
-        verify(brandingDistributorApi).onboardDistributor(any(RegisterDistributorCommand.class));
+        verify(brandingDistributorApi).onboardDistributor(any(RegisterDistributorCommand.class), any());
     }
 
     @Test
@@ -87,7 +87,7 @@ class DistributorProfileServiceImplTest {
                 .isDefault(true)
                 .build();
 
-        when(coreDistributorApi.getDistributorById(distributorId)).thenReturn(Mono.just(coreProfile));
+        when(coreDistributorApi.getDistributorById(eq(distributorId), any())).thenReturn(Mono.just(coreProfile));
         when(termsAndConditionsService.hasActiveSignedTerms(distributorId)).thenReturn(Mono.just(true));
         when(brandingService.listBrandings(distributorId)).thenReturn(Flux.just(defaultBranding));
 
@@ -111,7 +111,7 @@ class DistributorProfileServiceImplTest {
         coreProfile.setName("Acme Corp");
         coreProfile.setIsActive(false);
 
-        when(coreDistributorApi.getDistributorById(distributorId)).thenReturn(Mono.just(coreProfile));
+        when(coreDistributorApi.getDistributorById(eq(distributorId), any())).thenReturn(Mono.just(coreProfile));
         when(termsAndConditionsService.hasActiveSignedTerms(distributorId)).thenReturn(Mono.just(false));
         when(brandingService.listBrandings(distributorId)).thenReturn(Flux.empty());
 
@@ -137,9 +137,9 @@ class DistributorProfileServiceImplTest {
         updatedProfile.setName("Acme Corp Updated");
         updatedProfile.setIsActive(true);
 
-        when(coreDistributorApi.updateDistributor(eq(distributorId), any()))
+        when(coreDistributorApi.updateDistributor(eq(distributorId), any(), any()))
                 .thenReturn(Mono.just(updatedProfile));
-        when(coreDistributorApi.getDistributorById(distributorId)).thenReturn(Mono.just(updatedProfile));
+        when(coreDistributorApi.getDistributorById(eq(distributorId), any())).thenReturn(Mono.just(updatedProfile));
         when(termsAndConditionsService.hasActiveSignedTerms(distributorId)).thenReturn(Mono.just(false));
         when(brandingService.listBrandings(distributorId)).thenReturn(Flux.empty());
 
@@ -150,17 +150,17 @@ class DistributorProfileServiceImplTest {
                 })
                 .verifyComplete();
 
-        verify(coreDistributorApi).updateDistributor(eq(distributorId), any());
+        verify(coreDistributorApi).updateDistributor(eq(distributorId), any(), any());
     }
 
     @Test
     void deleteDistributor_shouldCallDeleteOnCoreApi() {
         UUID distributorId = UUID.randomUUID();
-        when(coreDistributorApi.deleteDistributor(distributorId)).thenReturn(Mono.empty());
+        when(coreDistributorApi.deleteDistributor(eq(distributorId), any())).thenReturn(Mono.empty());
 
         StepVerifier.create(service.deleteDistributor(distributorId))
                 .verifyComplete();
 
-        verify(coreDistributorApi).deleteDistributor(distributorId);
+        verify(coreDistributorApi).deleteDistributor(eq(distributorId), any());
     }
 }

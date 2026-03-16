@@ -68,14 +68,14 @@ class TerritoryServiceImplTest {
         CreateTerritoryCommand command = new CreateTerritoryCommand();
 
         when(territoryMapper.toCreateCommand(request)).thenReturn(command);
-        when(territoryApi.createTerritory(distributorId, command)).thenReturn(Mono.just(territoryId));
+        when(territoryApi.createTerritory(eq(distributorId), eq(command), any())).thenReturn(Mono.just(territoryId));
 
         StepVerifier.create(service.createTerritory(distributorId, request))
                 .assertNext(id -> assertThat(id).isEqualTo(territoryId))
                 .verifyComplete();
 
         verify(territoryMapper).toCreateCommand(request);
-        verify(territoryApi).createTerritory(distributorId, command);
+        verify(territoryApi).createTerritory(eq(distributorId), eq(command), any());
     }
 
     @Test
@@ -85,7 +85,7 @@ class TerritoryServiceImplTest {
         DistributorAuthorizedTerritoryDTO sdkDto = buildSdkTerritory(distributorId, territoryId);
         TerritoryDTO expected = buildTerritoryDTO(distributorId, territoryId);
 
-        when(territoryApi.getTerritory(distributorId, territoryId)).thenReturn(Mono.just(sdkDto));
+        when(territoryApi.getTerritory(eq(distributorId), eq(territoryId), any())).thenReturn(Mono.just(sdkDto));
         when(territoryMapper.toDto(sdkDto)).thenReturn(expected);
 
         StepVerifier.create(service.getTerritory(distributorId, territoryId))
@@ -96,7 +96,7 @@ class TerritoryServiceImplTest {
                 })
                 .verifyComplete();
 
-        verify(territoryApi).getTerritory(distributorId, territoryId);
+        verify(territoryApi).getTerritory(eq(distributorId), eq(territoryId), any());
         verify(territoryMapper).toDto(sdkDto);
     }
 
@@ -105,13 +105,13 @@ class TerritoryServiceImplTest {
         UUID distributorId = UUID.randomUUID();
         PaginationResponse response = new PaginationResponse();
 
-        when(territoryApi.listTerritories(distributorId)).thenReturn(Mono.just(response));
+        when(territoryApi.listTerritories(eq(distributorId), any())).thenReturn(Mono.just(response));
 
         StepVerifier.create(service.listTerritories(distributorId))
                 .assertNext(r -> assertThat(r).isSameAs(response))
                 .verifyComplete();
 
-        verify(territoryApi).listTerritories(distributorId);
+        verify(territoryApi).listTerritories(eq(distributorId), any());
     }
 
     @Test
@@ -125,7 +125,7 @@ class TerritoryServiceImplTest {
         UpdateTerritoryCommand command = new UpdateTerritoryCommand();
 
         when(territoryMapper.toUpdateCommand(request)).thenReturn(command);
-        when(territoryApi.updateTerritory(distributorId, territoryId, command))
+        when(territoryApi.updateTerritory(eq(distributorId), eq(territoryId), eq(command), any()))
                 .thenReturn(Mono.just(territoryId));
 
         StepVerifier.create(service.updateTerritory(distributorId, territoryId, request))
@@ -133,7 +133,7 @@ class TerritoryServiceImplTest {
                 .verifyComplete();
 
         verify(territoryMapper).toUpdateCommand(request);
-        verify(territoryApi).updateTerritory(distributorId, territoryId, command);
+        verify(territoryApi).updateTerritory(eq(distributorId), eq(territoryId), eq(command), any());
     }
 
     @Test
@@ -141,11 +141,11 @@ class TerritoryServiceImplTest {
         UUID distributorId = UUID.randomUUID();
         UUID territoryId = UUID.randomUUID();
 
-        when(territoryApi.deleteTerritory(distributorId, territoryId)).thenReturn(Mono.empty());
+        when(territoryApi.deleteTerritory(eq(distributorId), eq(territoryId), any())).thenReturn(Mono.empty());
 
         StepVerifier.create(service.deleteTerritory(distributorId, territoryId))
                 .verifyComplete();
 
-        verify(territoryApi).deleteTerritory(distributorId, territoryId);
+        verify(territoryApi).deleteTerritory(eq(distributorId), eq(territoryId), any());
     }
 }

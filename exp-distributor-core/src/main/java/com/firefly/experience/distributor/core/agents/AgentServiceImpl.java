@@ -26,7 +26,7 @@ public class AgentServiceImpl implements AgentService {
 
     @Override
     public Flux<AgentDTO> listAgents(UUID distributorId) {
-        return agentApi.listAgents(distributorId)
+        return agentApi.listAgents(distributorId, UUID.randomUUID().toString())
                 .flatMapMany(paginationResponse -> Flux.fromIterable(paginationResponse.getContent()))
                 .map(item -> {
                     DistributorAgentDTO sdk = mapObjectToAgentSdk(item);
@@ -40,14 +40,14 @@ public class AgentServiceImpl implements AgentService {
 
         // ARCH-EXCEPTION: domain-distributor-branding-sdk generated client does not expose an
         // xIdempotencyKey parameter on createAgent; idempotency cannot be set at call-site.
-        return agentApi.createAgent(distributorId, command)
-                .flatMap(id -> agentApi.getAgent(distributorId, id))
+        return agentApi.createAgent(distributorId, command, UUID.randomUUID().toString())
+                .flatMap(id -> agentApi.getAgent(distributorId, id, UUID.randomUUID().toString()))
                 .map(agentMapper::toDto);
     }
 
     @Override
     public Mono<AgentDTO> getAgent(UUID distributorId, UUID agentId) {
-        return agentApi.getAgent(distributorId, agentId)
+        return agentApi.getAgent(distributorId, agentId, UUID.randomUUID().toString())
                 .map(agentMapper::toDto);
     }
 
@@ -57,14 +57,14 @@ public class AgentServiceImpl implements AgentService {
 
         // ARCH-EXCEPTION: domain-distributor-branding-sdk generated client does not expose an
         // xIdempotencyKey parameter on updateAgent; idempotency cannot be set at call-site.
-        return agentApi.updateAgent(distributorId, agentId, command)
-                .flatMap(id -> agentApi.getAgent(distributorId, id))
+        return agentApi.updateAgent(distributorId, agentId, command, UUID.randomUUID().toString())
+                .flatMap(id -> agentApi.getAgent(distributorId, id, UUID.randomUUID().toString()))
                 .map(agentMapper::toDto);
     }
 
     @Override
     public Mono<Void> deleteAgent(UUID distributorId, UUID agentId) {
-        return agentApi.deleteAgent(distributorId, agentId);
+        return agentApi.deleteAgent(distributorId, agentId, UUID.randomUUID().toString());
     }
 
     @SuppressWarnings("unchecked")

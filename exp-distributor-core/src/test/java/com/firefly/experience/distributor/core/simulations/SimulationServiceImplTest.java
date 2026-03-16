@@ -17,6 +17,8 @@ import reactor.test.StepVerifier;
 import java.util.UUID;
 
 import static org.assertj.core.api.Assertions.assertThat;
+import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
@@ -60,7 +62,7 @@ class SimulationServiceImplTest {
         CreateSimulationCommand command = new CreateSimulationCommand();
 
         when(simulationMapper.toCommand(request)).thenReturn(command);
-        when(simulationsApi.createSimulation(distributorId, command)).thenReturn(Mono.just(simulationId));
+        when(simulationsApi.createSimulation(eq(distributorId), eq(command), any())).thenReturn(Mono.just(simulationId));
 
         StepVerifier.create(service.createSimulation(distributorId, request))
                 .assertNext(id -> assertThat(id).isEqualTo(simulationId))
@@ -70,7 +72,7 @@ class SimulationServiceImplTest {
         assertThat(command.getDistributorId()).isEqualTo(distributorId);
 
         verify(simulationMapper).toCommand(request);
-        verify(simulationsApi).createSimulation(distributorId, command);
+        verify(simulationsApi).createSimulation(eq(distributorId), eq(command), any());
     }
 
     @Test
@@ -80,7 +82,7 @@ class SimulationServiceImplTest {
         DistributorSimulationDTO sdkDto = buildSdkSimulation(distributorId, simulationId);
         SimulationResultDTO expected = buildSimulationResultDTO(distributorId, simulationId);
 
-        when(simulationsApi.getSimulation(distributorId, simulationId)).thenReturn(Mono.just(sdkDto));
+        when(simulationsApi.getSimulation(eq(distributorId), eq(simulationId), any())).thenReturn(Mono.just(sdkDto));
         when(simulationMapper.toDto(sdkDto)).thenReturn(expected);
 
         StepVerifier.create(service.getSimulation(distributorId, simulationId))
@@ -91,7 +93,7 @@ class SimulationServiceImplTest {
                 })
                 .verifyComplete();
 
-        verify(simulationsApi).getSimulation(distributorId, simulationId);
+        verify(simulationsApi).getSimulation(eq(distributorId), eq(simulationId), any());
         verify(simulationMapper).toDto(sdkDto);
     }
 }

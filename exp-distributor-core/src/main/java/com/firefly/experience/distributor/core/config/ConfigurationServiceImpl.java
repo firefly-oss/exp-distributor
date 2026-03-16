@@ -27,7 +27,7 @@ public class ConfigurationServiceImpl implements ConfigurationService {
     @Override
     public Flux<ConfigurationDTO> listConfigurations(UUID distributorId) {
         log.info("Listing configurations for distributor: {}", distributorId);
-        return configurationApi.listConfigurations(distributorId)
+        return configurationApi.listConfigurations(distributorId, UUID.randomUUID().toString())
                 .flatMapMany(paginationResponse -> Flux.fromIterable(paginationResponse.getContent()))
                 .map(item -> {
                     DistributorConfigurationDTO sdk = mapObjectToConfigSdk(item);
@@ -41,8 +41,8 @@ public class ConfigurationServiceImpl implements ConfigurationService {
         CreateConfigurationCommand command = configurationMapper.toCreateCommand(request);
         // ARCH-EXCEPTION: domain-distributor-branding-sdk generated client does not expose an
         // xIdempotencyKey parameter on createConfiguration; idempotency cannot be set at call-site.
-        return configurationApi.createConfiguration(distributorId, command)
-                .flatMap(configId -> configurationApi.getConfiguration(distributorId, configId))
+        return configurationApi.createConfiguration(distributorId, command, UUID.randomUUID().toString())
+                .flatMap(configId -> configurationApi.getConfiguration(distributorId, configId, UUID.randomUUID().toString()))
                 .map(configurationMapper::toDto);
     }
 
@@ -52,15 +52,15 @@ public class ConfigurationServiceImpl implements ConfigurationService {
         UpdateConfigurationCommand command = configurationMapper.toUpdateCommand(request);
         // ARCH-EXCEPTION: domain-distributor-branding-sdk generated client does not expose an
         // xIdempotencyKey parameter on updateConfiguration; idempotency cannot be set at call-site.
-        return configurationApi.updateConfiguration(distributorId, configId, command)
-                .flatMap(updatedId -> configurationApi.getConfiguration(distributorId, updatedId))
+        return configurationApi.updateConfiguration(distributorId, configId, command, UUID.randomUUID().toString())
+                .flatMap(updatedId -> configurationApi.getConfiguration(distributorId, updatedId, UUID.randomUUID().toString()))
                 .map(configurationMapper::toDto);
     }
 
     @Override
     public Mono<Void> deleteConfiguration(UUID distributorId, UUID configId) {
         log.info("Deleting configuration {} for distributor: {}", configId, distributorId);
-        return configurationApi.deleteConfiguration(distributorId, configId);
+        return configurationApi.deleteConfiguration(distributorId, configId, UUID.randomUUID().toString());
     }
 
     @SuppressWarnings("unchecked")

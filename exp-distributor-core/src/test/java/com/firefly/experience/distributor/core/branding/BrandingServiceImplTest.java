@@ -60,7 +60,7 @@ class BrandingServiceImplTest {
 
         DistributorBrandingDTO sdkResponse = buildSdkBrandingDTO(distributorId, brandingId);
 
-        when(distributorBrandingApi.createDistributorBranding(eq(distributorId), any()))
+        when(distributorBrandingApi.createDistributorBranding(eq(distributorId), any(), any()))
                 .thenReturn(Mono.just(sdkResponse));
 
         StepVerifier.create(service.createBranding(distributorId, request))
@@ -72,7 +72,7 @@ class BrandingServiceImplTest {
                 })
                 .verifyComplete();
 
-        verify(distributorBrandingApi).createDistributorBranding(eq(distributorId), any());
+        verify(distributorBrandingApi).createDistributorBranding(eq(distributorId), any(), any());
     }
 
     @Test
@@ -81,7 +81,7 @@ class BrandingServiceImplTest {
         UUID brandingId = UUID.randomUUID();
         DistributorBrandingDTO sdkResponse = buildSdkBrandingDTO(distributorId, brandingId);
 
-        when(distributorBrandingApi.getDistributorBrandingById(distributorId, brandingId))
+        when(distributorBrandingApi.getDistributorBrandingById(eq(distributorId), eq(brandingId), any()))
                 .thenReturn(Mono.just(sdkResponse));
 
         StepVerifier.create(service.getBranding(distributorId, brandingId))
@@ -104,9 +104,9 @@ class BrandingServiceImplTest {
         DistributorBrandingDTO updatedSdk = buildSdkBrandingDTO(distributorId, brandingId);
         updatedSdk.setLogoUrl("https://example.com/new-logo.png");
 
-        when(brandingDistributorApi.reviseBranding(eq(distributorId), eq(brandingId), any(ReviseBrandingCommand.class)))
+        when(brandingDistributorApi.reviseBranding(eq(distributorId), eq(brandingId), any(ReviseBrandingCommand.class), any()))
                 .thenReturn(Mono.just(brandingId));
-        when(distributorBrandingApi.getDistributorBrandingById(distributorId, brandingId))
+        when(distributorBrandingApi.getDistributorBrandingById(eq(distributorId), eq(brandingId), any()))
                 .thenReturn(Mono.just(updatedSdk));
 
         StepVerifier.create(service.updateBranding(distributorId, brandingId, request))
@@ -116,21 +116,21 @@ class BrandingServiceImplTest {
                 })
                 .verifyComplete();
 
-        verify(brandingDistributorApi).reviseBranding(eq(distributorId), eq(brandingId), any(ReviseBrandingCommand.class));
-        verify(distributorBrandingApi).getDistributorBrandingById(distributorId, brandingId);
+        verify(brandingDistributorApi).reviseBranding(eq(distributorId), eq(brandingId), any(ReviseBrandingCommand.class), any());
+        verify(distributorBrandingApi).getDistributorBrandingById(eq(distributorId), eq(brandingId), any());
     }
 
     @Test
     void deleteBranding_shouldCallDeleteOnCoreApi() {
         UUID distributorId = UUID.randomUUID();
         UUID brandingId = UUID.randomUUID();
-        when(distributorBrandingApi.deleteDistributorBranding(distributorId, brandingId))
+        when(distributorBrandingApi.deleteDistributorBranding(eq(distributorId), eq(brandingId), any()))
                 .thenReturn(Mono.empty());
 
         StepVerifier.create(service.deleteBranding(distributorId, brandingId))
                 .verifyComplete();
 
-        verify(distributorBrandingApi).deleteDistributorBranding(distributorId, brandingId);
+        verify(distributorBrandingApi).deleteDistributorBranding(eq(distributorId), eq(brandingId), any());
     }
 
     @Test
@@ -141,9 +141,9 @@ class BrandingServiceImplTest {
         DistributorBrandingDTO defaultBranding = buildSdkBrandingDTO(distributorId, brandingId);
         defaultBranding.setIsDefault(true);
 
-        when(brandingDistributorApi.setDefaultBranding(eq(distributorId), eq(brandingId), any(SetDefaultBrandingCommand.class)))
+        when(brandingDistributorApi.setDefaultBranding(eq(distributorId), eq(brandingId), any(SetDefaultBrandingCommand.class), any()))
                 .thenReturn(Mono.just(brandingId));
-        when(distributorBrandingApi.getDistributorBrandingById(distributorId, brandingId))
+        when(distributorBrandingApi.getDistributorBrandingById(eq(distributorId), eq(brandingId), any()))
                 .thenReturn(Mono.just(defaultBranding));
 
         StepVerifier.create(service.setDefaultBranding(distributorId, brandingId))
@@ -153,6 +153,6 @@ class BrandingServiceImplTest {
                 })
                 .verifyComplete();
 
-        verify(brandingDistributorApi).setDefaultBranding(eq(distributorId), eq(brandingId), any(SetDefaultBrandingCommand.class));
+        verify(brandingDistributorApi).setDefaultBranding(eq(distributorId), eq(brandingId), any(SetDefaultBrandingCommand.class), any());
     }
 }

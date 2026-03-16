@@ -60,7 +60,7 @@ class CatalogServiceImplTest {
         ProductDTO sdkProduct = buildSdkProductDTO(productId, distributorId);
         CatalogItemDTO expectedDto = buildCatalogItemDTO(productId, distributorId);
 
-        when(catalogDistributorApi.listCatalog(distributorId)).thenReturn(Flux.just(sdkProduct));
+        when(catalogDistributorApi.listCatalog(eq(distributorId), any())).thenReturn(Flux.just(sdkProduct));
         when(catalogMapper.toDto(sdkProduct)).thenReturn(expectedDto);
 
         StepVerifier.create(service.listCatalog(distributorId))
@@ -71,7 +71,7 @@ class CatalogServiceImplTest {
                 })
                 .verifyComplete();
 
-        verify(catalogDistributorApi).listCatalog(distributorId);
+        verify(catalogDistributorApi).listCatalog(eq(distributorId), any());
     }
 
     @Test
@@ -83,14 +83,14 @@ class CatalogServiceImplTest {
                 .productName("New Product")
                 .build();
 
-        when(catalogDistributorApi.registerProduct(eq(distributorId), any()))
+        when(catalogDistributorApi.registerProduct(eq(distributorId), any(), any()))
                 .thenReturn(Mono.just(newId));
 
         StepVerifier.create(service.addToCatalog(distributorId, request))
                 .assertNext(id -> assertThat(id).isEqualTo(newId))
                 .verifyComplete();
 
-        verify(catalogDistributorApi).registerProduct(eq(distributorId), any());
+        verify(catalogDistributorApi).registerProduct(eq(distributorId), any(), any());
     }
 
     @Test
@@ -103,7 +103,7 @@ class CatalogServiceImplTest {
         ProductDTO otherProduct = buildSdkProductDTO(otherId, distributorId);
         CatalogItemDTO expectedDto = buildCatalogItemDTO(targetId, distributorId);
 
-        when(catalogDistributorApi.listCatalog(distributorId))
+        when(catalogDistributorApi.listCatalog(eq(distributorId), any()))
                 .thenReturn(Flux.just(otherProduct, targetProduct));
         when(catalogMapper.toDto(targetProduct)).thenReturn(expectedDto);
 
@@ -120,7 +120,7 @@ class CatalogServiceImplTest {
 
         ProductDTO sdkProduct = buildSdkProductDTO(productId, distributorId);
 
-        when(catalogDistributorApi.listCatalog(distributorId)).thenReturn(Flux.just(sdkProduct));
+        when(catalogDistributorApi.listCatalog(eq(distributorId), any())).thenReturn(Flux.just(sdkProduct));
 
         StepVerifier.create(service.getCatalogItem(distributorId, unknownId))
                 .verifyComplete();
@@ -135,14 +135,14 @@ class CatalogServiceImplTest {
                 .isActive(true)
                 .build();
 
-        when(catalogDistributorApi.reviseProduct(eq(distributorId), eq(catalogItemId), any()))
+        when(catalogDistributorApi.reviseProduct(eq(distributorId), eq(catalogItemId), any(), any()))
                 .thenReturn(Mono.just(catalogItemId));
 
         StepVerifier.create(service.updateCatalogItem(distributorId, catalogItemId, request))
                 .assertNext(id -> assertThat(id).isEqualTo(catalogItemId))
                 .verifyComplete();
 
-        verify(catalogDistributorApi).reviseProduct(eq(distributorId), eq(catalogItemId), any());
+        verify(catalogDistributorApi).reviseProduct(eq(distributorId), eq(catalogItemId), any(), any());
     }
 
     @Test
@@ -150,13 +150,13 @@ class CatalogServiceImplTest {
         UUID distributorId = UUID.randomUUID();
         UUID catalogItemId = UUID.randomUUID();
 
-        when(catalogDistributorApi.retireProduct(eq(distributorId), eq(catalogItemId), any()))
+        when(catalogDistributorApi.retireProduct(eq(distributorId), eq(catalogItemId), any(), any()))
                 .thenReturn(Mono.just(catalogItemId));
 
         StepVerifier.create(service.removeFromCatalog(distributorId, catalogItemId))
                 .assertNext(id -> assertThat(id).isEqualTo(catalogItemId))
                 .verifyComplete();
 
-        verify(catalogDistributorApi).retireProduct(eq(distributorId), eq(catalogItemId), any());
+        verify(catalogDistributorApi).retireProduct(eq(distributorId), eq(catalogItemId), any(), any());
     }
 }

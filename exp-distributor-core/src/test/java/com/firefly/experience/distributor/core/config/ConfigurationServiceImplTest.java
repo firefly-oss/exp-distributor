@@ -21,6 +21,8 @@ import java.util.List;
 import java.util.UUID;
 
 import static org.assertj.core.api.Assertions.assertThat;
+import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
@@ -68,7 +70,7 @@ class ConfigurationServiceImplTest {
         PaginationResponse paginationResponse = new PaginationResponse();
         paginationResponse.setContent(List.of(sdkDto));
 
-        when(configurationApi.listConfigurations(distributorId)).thenReturn(Mono.just(paginationResponse));
+        when(configurationApi.listConfigurations(eq(distributorId), any())).thenReturn(Mono.just(paginationResponse));
         when(configurationMapper.toDto(sdkDto)).thenReturn(expected);
 
         StepVerifier.create(service.listConfigurations(distributorId))
@@ -80,7 +82,7 @@ class ConfigurationServiceImplTest {
                 })
                 .verifyComplete();
 
-        verify(configurationApi).listConfigurations(distributorId);
+        verify(configurationApi).listConfigurations(eq(distributorId), any());
         verify(configurationMapper).toDto(sdkDto);
     }
 
@@ -90,12 +92,12 @@ class ConfigurationServiceImplTest {
         PaginationResponse emptyResponse = new PaginationResponse();
         emptyResponse.setContent(List.of());
 
-        when(configurationApi.listConfigurations(distributorId)).thenReturn(Mono.just(emptyResponse));
+        when(configurationApi.listConfigurations(eq(distributorId), any())).thenReturn(Mono.just(emptyResponse));
 
         StepVerifier.create(service.listConfigurations(distributorId))
                 .verifyComplete();
 
-        verify(configurationApi).listConfigurations(distributorId);
+        verify(configurationApi).listConfigurations(eq(distributorId), any());
     }
 
     @Test
@@ -112,8 +114,8 @@ class ConfigurationServiceImplTest {
         ConfigurationDTO expected = buildConfigDTO(distributorId, configId);
 
         when(configurationMapper.toCreateCommand(request)).thenReturn(command);
-        when(configurationApi.createConfiguration(distributorId, command)).thenReturn(Mono.just(configId));
-        when(configurationApi.getConfiguration(distributorId, configId)).thenReturn(Mono.just(sdkDto));
+        when(configurationApi.createConfiguration(eq(distributorId), eq(command), any())).thenReturn(Mono.just(configId));
+        when(configurationApi.getConfiguration(eq(distributorId), eq(configId), any())).thenReturn(Mono.just(sdkDto));
         when(configurationMapper.toDto(sdkDto)).thenReturn(expected);
 
         StepVerifier.create(service.createConfiguration(distributorId, request))
@@ -124,8 +126,8 @@ class ConfigurationServiceImplTest {
                 .verifyComplete();
 
         verify(configurationMapper).toCreateCommand(request);
-        verify(configurationApi).createConfiguration(distributorId, command);
-        verify(configurationApi).getConfiguration(distributorId, configId);
+        verify(configurationApi).createConfiguration(eq(distributorId), eq(command), any());
+        verify(configurationApi).getConfiguration(eq(distributorId), eq(configId), any());
         verify(configurationMapper).toDto(sdkDto);
     }
 
@@ -142,8 +144,8 @@ class ConfigurationServiceImplTest {
         ConfigurationDTO expected = buildConfigDTO(distributorId, configId);
 
         when(configurationMapper.toUpdateCommand(request)).thenReturn(command);
-        when(configurationApi.updateConfiguration(distributorId, configId, command)).thenReturn(Mono.just(configId));
-        when(configurationApi.getConfiguration(distributorId, configId)).thenReturn(Mono.just(sdkDto));
+        when(configurationApi.updateConfiguration(eq(distributorId), eq(configId), eq(command), any())).thenReturn(Mono.just(configId));
+        when(configurationApi.getConfiguration(eq(distributorId), eq(configId), any())).thenReturn(Mono.just(sdkDto));
         when(configurationMapper.toDto(sdkDto)).thenReturn(expected);
 
         StepVerifier.create(service.updateConfiguration(distributorId, configId, request))
@@ -151,8 +153,8 @@ class ConfigurationServiceImplTest {
                 .verifyComplete();
 
         verify(configurationMapper).toUpdateCommand(request);
-        verify(configurationApi).updateConfiguration(distributorId, configId, command);
-        verify(configurationApi).getConfiguration(distributorId, configId);
+        verify(configurationApi).updateConfiguration(eq(distributorId), eq(configId), eq(command), any());
+        verify(configurationApi).getConfiguration(eq(distributorId), eq(configId), any());
     }
 
     @Test
@@ -160,11 +162,11 @@ class ConfigurationServiceImplTest {
         UUID distributorId = UUID.randomUUID();
         UUID configId = UUID.randomUUID();
 
-        when(configurationApi.deleteConfiguration(distributorId, configId)).thenReturn(Mono.empty());
+        when(configurationApi.deleteConfiguration(eq(distributorId), eq(configId), any())).thenReturn(Mono.empty());
 
         StepVerifier.create(service.deleteConfiguration(distributorId, configId))
                 .verifyComplete();
 
-        verify(configurationApi).deleteConfiguration(distributorId, configId);
+        verify(configurationApi).deleteConfiguration(eq(distributorId), eq(configId), any());
     }
 }

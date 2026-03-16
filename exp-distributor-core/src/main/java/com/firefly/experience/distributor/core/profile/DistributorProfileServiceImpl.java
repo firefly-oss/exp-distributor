@@ -54,7 +54,7 @@ public class DistributorProfileServiceImpl implements DistributorProfileService 
 
         // ARCH-EXCEPTION: domain-distributor-branding-sdk generated client does not expose an
         // xIdempotencyKey parameter on onboardDistributor; idempotency cannot be set at call-site.
-        return brandingDistributorApi.onboardDistributor(sdkCommand)
+        return brandingDistributorApi.onboardDistributor(sdkCommand, UUID.randomUUID().toString())
                 .map(result -> {
                     UUID distributorId = (UUID) result;
                     return DistributorDetailDTO.builder()
@@ -73,7 +73,7 @@ public class DistributorProfileServiceImpl implements DistributorProfileService 
     public Mono<DistributorDetailDTO> getDistributorDetail(UUID distributorId) {
         // Fan out three independent calls concurrently, then combine
         Mono<com.firefly.core.distributor.sdk.model.DistributorDTO> profileMono =
-                coreDistributorApi.getDistributorById(distributorId);
+                coreDistributorApi.getDistributorById(distributorId, UUID.randomUUID().toString());
 
         Mono<Boolean> hasTermsMono =
                 termsAndConditionsService.hasActiveSignedTerms(distributorId);
@@ -111,14 +111,14 @@ public class DistributorProfileServiceImpl implements DistributorProfileService 
 
         // ARCH-EXCEPTION: core-common-distributor-mgmt-sdk generated client does not expose an
         // xIdempotencyKey parameter on updateDistributor; idempotency cannot be set at call-site.
-        return coreDistributorApi.updateDistributor(distributorId, updateDto)
+        return coreDistributorApi.updateDistributor(distributorId, updateDto, UUID.randomUUID().toString())
                 .flatMap(updated -> getDistributorDetail(distributorId))
                 .doOnNext(dto -> log.info("Updated distributor: distributorId={}", distributorId));
     }
 
     @Override
     public Mono<Void> deleteDistributor(UUID distributorId) {
-        return coreDistributorApi.deleteDistributor(distributorId)
+        return coreDistributorApi.deleteDistributor(distributorId, UUID.randomUUID().toString())
                 .doOnSuccess(v -> log.info("Deleted distributor: distributorId={}", distributorId));
     }
 }

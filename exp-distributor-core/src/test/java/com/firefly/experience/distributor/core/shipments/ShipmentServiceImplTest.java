@@ -100,11 +100,11 @@ class ShipmentServiceImplTest {
         ShipmentDTO dto1 = ShipmentDTO.builder().id(shipmentId1).productId(productId1).build();
         ShipmentDTO dto2 = ShipmentDTO.builder().id(shipmentId2).productId(productId2).build();
 
-        when(catalogDistributorApi.listCatalog(distributorId))
+        when(catalogDistributorApi.listCatalog(eq(distributorId), any()))
                 .thenReturn(Flux.just(product1, product2));
-        when(catalogDistributorApi.trackProductShipments(distributorId, productId1))
+        when(catalogDistributorApi.trackProductShipments(eq(distributorId), eq(productId1), any()))
                 .thenReturn(Flux.just(sdkShipment1));
-        when(catalogDistributorApi.trackProductShipments(distributorId, productId2))
+        when(catalogDistributorApi.trackProductShipments(eq(distributorId), eq(productId2), any()))
                 .thenReturn(Flux.just(sdkShipment2));
         when(shipmentMapper.toCatalogShipmentDto(sdkShipment1)).thenReturn(dto1);
         when(shipmentMapper.toCatalogShipmentDto(sdkShipment2)).thenReturn(dto2);
@@ -120,8 +120,8 @@ class ShipmentServiceImplTest {
                 })
                 .verifyComplete();
 
-        verify(catalogDistributorApi).trackProductShipments(distributorId, productId1);
-        verify(catalogDistributorApi).trackProductShipments(distributorId, productId2);
+        verify(catalogDistributorApi).trackProductShipments(eq(distributorId), eq(productId1), any());
+        verify(catalogDistributorApi).trackProductShipments(eq(distributorId), eq(productId2), any());
     }
 
     @Test
@@ -129,7 +129,7 @@ class ShipmentServiceImplTest {
         UUID distributorId = UUID.randomUUID();
         ProductDTO nullIdProduct = buildProduct(null);
 
-        when(catalogDistributorApi.listCatalog(distributorId))
+        when(catalogDistributorApi.listCatalog(eq(distributorId), any()))
                 .thenReturn(Flux.just(nullIdProduct));
 
         StepVerifier.create(service.listShipments(distributorId))
@@ -157,9 +157,9 @@ class ShipmentServiceImplTest {
         ShipmentDTO expectedDto = buildExpShipmentDTO(shipmentId, distributorId);
 
         when(shipmentMapper.toCommand(request)).thenReturn(cmd);
-        when(catalogDistributorApi.shipContractItem(eq(distributorId), eq(productId), any()))
+        when(catalogDistributorApi.shipContractItem(eq(distributorId), eq(productId), any(), any()))
                 .thenReturn(Mono.just(shipmentId));
-        when(coreShipmentApi.getShipmentById(shipmentId)).thenReturn(Mono.just(coreShipment));
+        when(coreShipmentApi.getShipmentById(eq(shipmentId), any())).thenReturn(Mono.just(coreShipment));
         when(shipmentMapper.toCoreDto(coreShipment)).thenReturn(expectedDto);
 
         StepVerifier.create(service.registerShipment(distributorId, request))
@@ -169,8 +169,8 @@ class ShipmentServiceImplTest {
                 })
                 .verifyComplete();
 
-        verify(catalogDistributorApi).shipContractItem(eq(distributorId), eq(productId), any());
-        verify(coreShipmentApi).getShipmentById(shipmentId);
+        verify(catalogDistributorApi).shipContractItem(eq(distributorId), eq(productId), any(), any());
+        verify(coreShipmentApi).getShipmentById(eq(shipmentId), any());
     }
 
     // ── getShipment ──────────────────────────────────────────────────────────
@@ -183,7 +183,7 @@ class ShipmentServiceImplTest {
         com.firefly.core.distributor.sdk.model.ShipmentDTO coreShipment = buildCoreShipment(shipmentId);
         ShipmentDTO expectedDto = buildExpShipmentDTO(shipmentId, distributorId);
 
-        when(coreShipmentApi.getShipmentById(shipmentId)).thenReturn(Mono.just(coreShipment));
+        when(coreShipmentApi.getShipmentById(eq(shipmentId), any())).thenReturn(Mono.just(coreShipment));
         when(shipmentMapper.toCoreDto(coreShipment)).thenReturn(expectedDto);
 
         StepVerifier.create(service.getShipment(distributorId, shipmentId))
@@ -193,7 +193,7 @@ class ShipmentServiceImplTest {
                 })
                 .verifyComplete();
 
-        verify(coreShipmentApi).getShipmentById(shipmentId);
+        verify(coreShipmentApi).getShipmentById(eq(shipmentId), any());
     }
 
     // ── updateShipment ───────────────────────────────────────────────────────
@@ -214,7 +214,7 @@ class ShipmentServiceImplTest {
         ShipmentDTO expectedDto = buildExpShipmentDTO(shipmentId, distributorId);
 
         when(shipmentMapper.toUpdateSdkDto(request)).thenReturn(updateCmd);
-        when(coreShipmentApi.updateShipment(shipmentId, updateCmd)).thenReturn(Mono.just(coreShipment));
+        when(coreShipmentApi.updateShipment(eq(shipmentId), eq(updateCmd), any())).thenReturn(Mono.just(coreShipment));
         when(shipmentMapper.toCoreDto(coreShipment)).thenReturn(expectedDto);
 
         StepVerifier.create(service.updateShipment(distributorId, shipmentId, request))
@@ -224,7 +224,7 @@ class ShipmentServiceImplTest {
                 })
                 .verifyComplete();
 
-        verify(coreShipmentApi).updateShipment(eq(shipmentId), any());
+        verify(coreShipmentApi).updateShipment(eq(shipmentId), any(), any());
     }
 
     // ── deleteShipment ───────────────────────────────────────────────────────
@@ -234,12 +234,12 @@ class ShipmentServiceImplTest {
         UUID distributorId = UUID.randomUUID();
         UUID shipmentId = UUID.randomUUID();
 
-        when(coreShipmentApi.deleteShipment(shipmentId)).thenReturn(Mono.empty());
+        when(coreShipmentApi.deleteShipment(eq(shipmentId), any())).thenReturn(Mono.empty());
 
         StepVerifier.create(service.deleteShipment(distributorId, shipmentId))
                 .verifyComplete();
 
-        verify(coreShipmentApi).deleteShipment(shipmentId);
+        verify(coreShipmentApi).deleteShipment(eq(shipmentId), any());
     }
 
     // ── getTracking ──────────────────────────────────────────────────────────
@@ -257,7 +257,7 @@ class ShipmentServiceImplTest {
                 .currentStatus("IN_TRANSIT")
                 .build();
 
-        when(coreShipmentApi.getShipmentById(shipmentId)).thenReturn(Mono.just(coreShipment));
+        when(coreShipmentApi.getShipmentById(eq(shipmentId), any())).thenReturn(Mono.just(coreShipment));
         when(shipmentMapper.toCoreTracking(coreShipment)).thenReturn(trackingDTO);
 
         StepVerifier.create(service.getTracking(distributorId, shipmentId))
@@ -268,7 +268,7 @@ class ShipmentServiceImplTest {
                 })
                 .verifyComplete();
 
-        verify(coreShipmentApi).getShipmentById(shipmentId);
+        verify(coreShipmentApi).getShipmentById(eq(shipmentId), any());
     }
 
     // ── updateStatus ─────────────────────────────────────────────────────────
@@ -287,7 +287,7 @@ class ShipmentServiceImplTest {
         ShipmentDTO expectedDto = buildExpShipmentDTO(shipmentId, distributorId);
         expectedDto.setStatus("DELIVERED");
 
-        when(coreShipmentApi.updateShipmentStatus(eq(shipmentId), eq("DELIVERED"), isNull()))
+        when(coreShipmentApi.updateShipmentStatus(eq(shipmentId), eq("DELIVERED"), isNull(), any()))
                 .thenReturn(Mono.just(coreShipment));
         when(shipmentMapper.toCoreDto(coreShipment)).thenReturn(expectedDto);
 
@@ -298,6 +298,6 @@ class ShipmentServiceImplTest {
                 })
                 .verifyComplete();
 
-        verify(coreShipmentApi).updateShipmentStatus(eq(shipmentId), eq("DELIVERED"), isNull());
+        verify(coreShipmentApi).updateShipmentStatus(eq(shipmentId), eq("DELIVERED"), isNull(), any());
     }
 }
