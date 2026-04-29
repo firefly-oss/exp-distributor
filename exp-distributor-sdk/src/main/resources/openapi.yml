@@ -1,0 +1,2982 @@
+openapi: 3.0.1
+info:
+  title: OpenAPI definition
+  version: v0
+servers:
+- url: http://localhost:18080
+  description: Generated server url
+tags:
+- name: Configurations
+  description: Distributor configuration management
+- name: Agent-Agency Assignments
+  description: Manage agent-to-agency assignments
+- name: Shipments
+  description: Manage distributor shipments
+- name: Territories
+  description: Manage distributor authorized territories
+- name: Distributor Profile
+  description: Distributor profile management operations
+- name: Branding
+  description: Distributor branding management operations
+- name: Operations
+  description: Distributor operations management
+- name: Agencies
+  description: Manage distributor agencies
+- name: Agents
+  description: Manage distributor agents
+- name: Terms and Conditions
+  description: Terms and conditions management operations
+- name: Products
+  description: Distributor product management operations
+- name: Simulations
+  description: Distributor simulation management
+- name: Catalog
+  description: Distributor catalog management operations
+paths:
+  /api/v1/experience/distributors/{distributorId}/territories/{territoryId}:
+    get:
+      tags:
+      - Territories
+      summary: Get territory
+      description: Retrieve a single authorized territory by its identifier
+      operationId: getTerritory
+      parameters:
+      - name: distributorId
+        in: path
+        required: true
+        schema:
+          type: string
+          format: uuid
+      - name: territoryId
+        in: path
+        required: true
+        schema:
+          type: string
+          format: uuid
+      - name: X-Idempotency-Key
+        in: header
+        description: "Unique key for idempotent requests. If provided, ensures that\
+          \ identical requests with the same key will only be processed once."
+        required: false
+        schema:
+          type: string
+      responses:
+        "200":
+          description: OK
+          content:
+            '*/*':
+              schema:
+                $ref: "#/components/schemas/TerritoryDTO"
+    put:
+      tags:
+      - Territories
+      summary: Update territory
+      description: Update an existing authorized territory
+      operationId: updateTerritory
+      parameters:
+      - name: distributorId
+        in: path
+        required: true
+        schema:
+          type: string
+          format: uuid
+      - name: territoryId
+        in: path
+        required: true
+        schema:
+          type: string
+          format: uuid
+      - name: X-Idempotency-Key
+        in: header
+        description: "Unique key for idempotent requests. If provided, ensures that\
+          \ identical requests with the same key will only be processed once."
+        required: false
+        schema:
+          type: string
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/UpdateTerritoryRequest"
+        required: true
+      responses:
+        "200":
+          description: OK
+          content:
+            '*/*':
+              schema:
+                type: string
+                format: uuid
+    delete:
+      tags:
+      - Territories
+      summary: Delete territory
+      description: Delete an authorized territory from a distributor
+      operationId: deleteTerritory
+      parameters:
+      - name: distributorId
+        in: path
+        required: true
+        schema:
+          type: string
+          format: uuid
+      - name: territoryId
+        in: path
+        required: true
+        schema:
+          type: string
+          format: uuid
+      - name: X-Idempotency-Key
+        in: header
+        description: "Unique key for idempotent requests. If provided, ensures that\
+          \ identical requests with the same key will only be processed once."
+        required: false
+        schema:
+          type: string
+      responses:
+        "200":
+          description: OK
+  /api/v1/experience/distributors/{distributorId}/terms-and-conditions/{tcId}:
+    get:
+      tags:
+      - Terms and Conditions
+      summary: Get terms detail
+      description: Get terms and conditions detail by ID
+      operationId: getTermsDetail
+      parameters:
+      - name: distributorId
+        in: path
+        required: true
+        schema:
+          type: string
+          format: uuid
+      - name: tcId
+        in: path
+        required: true
+        schema:
+          type: string
+          format: uuid
+      - name: X-Idempotency-Key
+        in: header
+        description: "Unique key for idempotent requests. If provided, ensures that\
+          \ identical requests with the same key will only be processed once."
+        required: false
+        schema:
+          type: string
+      responses:
+        "200":
+          description: OK
+          content:
+            '*/*':
+              schema:
+                $ref: "#/components/schemas/TermsDTO"
+    put:
+      tags:
+      - Terms and Conditions
+      summary: Update terms and conditions
+      description: Update existing terms and conditions
+      operationId: updateTerms
+      parameters:
+      - name: distributorId
+        in: path
+        required: true
+        schema:
+          type: string
+          format: uuid
+      - name: tcId
+        in: path
+        required: true
+        schema:
+          type: string
+          format: uuid
+      - name: X-Idempotency-Key
+        in: header
+        description: "Unique key for idempotent requests. If provided, ensures that\
+          \ identical requests with the same key will only be processed once."
+        required: false
+        schema:
+          type: string
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/UpdateTermsRequest"
+        required: true
+      responses:
+        "200":
+          description: OK
+          content:
+            '*/*':
+              schema:
+                $ref: "#/components/schemas/TermsDTO"
+    delete:
+      tags:
+      - Terms and Conditions
+      summary: Delete terms and conditions
+      description: Delete terms and conditions by ID
+      operationId: deleteTerms
+      parameters:
+      - name: distributorId
+        in: path
+        required: true
+        schema:
+          type: string
+          format: uuid
+      - name: tcId
+        in: path
+        required: true
+        schema:
+          type: string
+          format: uuid
+      - name: X-Idempotency-Key
+        in: header
+        description: "Unique key for idempotent requests. If provided, ensures that\
+          \ identical requests with the same key will only be processed once."
+        required: false
+        schema:
+          type: string
+      responses:
+        "200":
+          description: OK
+  /api/v1/experience/distributors/{distributorId}/shipments/{shipmentId}/status:
+    put:
+      tags:
+      - Shipments
+      summary: Update shipment status
+      description: "Update the status of a shipment (e.g. SHIPPED, IN_TRANSIT, DELIVERED)."
+      operationId: updateStatus
+      parameters:
+      - name: distributorId
+        in: path
+        required: true
+        schema:
+          type: string
+          format: uuid
+      - name: shipmentId
+        in: path
+        required: true
+        schema:
+          type: string
+          format: uuid
+      - name: X-Idempotency-Key
+        in: header
+        description: "Unique key for idempotent requests. If provided, ensures that\
+          \ identical requests with the same key will only be processed once."
+        required: false
+        schema:
+          type: string
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/UpdateStatusRequest"
+        required: true
+      responses:
+        "200":
+          description: OK
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ShipmentDTO"
+  /api/v1/experience/distributors/{distributorId}/shipments/{shipmentId}:
+    get:
+      tags:
+      - Shipments
+      summary: Get shipment
+      description: Retrieve a specific shipment by ID.
+      operationId: getShipment
+      parameters:
+      - name: distributorId
+        in: path
+        required: true
+        schema:
+          type: string
+          format: uuid
+      - name: shipmentId
+        in: path
+        required: true
+        schema:
+          type: string
+          format: uuid
+      - name: X-Idempotency-Key
+        in: header
+        description: "Unique key for idempotent requests. If provided, ensures that\
+          \ identical requests with the same key will only be processed once."
+        required: false
+        schema:
+          type: string
+      responses:
+        "200":
+          description: OK
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ShipmentDTO"
+    put:
+      tags:
+      - Shipments
+      summary: Update shipment
+      description: "Update shipment details (carrier, tracking number, address, estimated\
+        \ delivery)."
+      operationId: updateShipment
+      parameters:
+      - name: distributorId
+        in: path
+        required: true
+        schema:
+          type: string
+          format: uuid
+      - name: shipmentId
+        in: path
+        required: true
+        schema:
+          type: string
+          format: uuid
+      - name: X-Idempotency-Key
+        in: header
+        description: "Unique key for idempotent requests. If provided, ensures that\
+          \ identical requests with the same key will only be processed once."
+        required: false
+        schema:
+          type: string
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/UpdateShipmentRequest"
+        required: true
+      responses:
+        "200":
+          description: OK
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ShipmentDTO"
+    delete:
+      tags:
+      - Shipments
+      summary: Delete shipment
+      description: Delete a shipment record.
+      operationId: deleteShipment
+      parameters:
+      - name: distributorId
+        in: path
+        required: true
+        schema:
+          type: string
+          format: uuid
+      - name: shipmentId
+        in: path
+        required: true
+        schema:
+          type: string
+          format: uuid
+      - name: X-Idempotency-Key
+        in: header
+        description: "Unique key for idempotent requests. If provided, ensures that\
+          \ identical requests with the same key will only be processed once."
+        required: false
+        schema:
+          type: string
+      responses:
+        "200":
+          description: OK
+  /api/v1/experience/distributors/{distributorId}/products/{productId}:
+    get:
+      tags:
+      - Products
+      summary: Get product
+      description: Retrieve a specific product by ID
+      operationId: getProduct
+      parameters:
+      - name: distributorId
+        in: path
+        required: true
+        schema:
+          type: string
+          format: uuid
+      - name: productId
+        in: path
+        required: true
+        schema:
+          type: string
+          format: uuid
+      - name: X-Idempotency-Key
+        in: header
+        description: "Unique key for idempotent requests. If provided, ensures that\
+          \ identical requests with the same key will only be processed once."
+        required: false
+        schema:
+          type: string
+      responses:
+        "200":
+          description: OK
+          content:
+            '*/*':
+              schema:
+                $ref: "#/components/schemas/ProductDetailDTO"
+    put:
+      tags:
+      - Products
+      summary: Update product
+      description: Update an existing product
+      operationId: updateProduct
+      parameters:
+      - name: distributorId
+        in: path
+        required: true
+        schema:
+          type: string
+          format: uuid
+      - name: productId
+        in: path
+        required: true
+        schema:
+          type: string
+          format: uuid
+      - name: X-Idempotency-Key
+        in: header
+        description: "Unique key for idempotent requests. If provided, ensures that\
+          \ identical requests with the same key will only be processed once."
+        required: false
+        schema:
+          type: string
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/UpdateProductRequest"
+        required: true
+      responses:
+        "200":
+          description: OK
+          content:
+            '*/*':
+              schema:
+                type: string
+                format: uuid
+    delete:
+      tags:
+      - Products
+      summary: Remove product
+      description: Remove a product from the distributor
+      operationId: removeProduct
+      parameters:
+      - name: distributorId
+        in: path
+        required: true
+        schema:
+          type: string
+          format: uuid
+      - name: productId
+        in: path
+        required: true
+        schema:
+          type: string
+          format: uuid
+      - name: X-Idempotency-Key
+        in: header
+        description: "Unique key for idempotent requests. If provided, ensures that\
+          \ identical requests with the same key will only be processed once."
+        required: false
+        schema:
+          type: string
+      responses:
+        "200":
+          description: OK
+  /api/v1/experience/distributors/{distributorId}/operations/{operationId}:
+    put:
+      tags:
+      - Operations
+      summary: Update operation
+      description: Update an existing operation
+      operationId: updateOperation
+      parameters:
+      - name: distributorId
+        in: path
+        required: true
+        schema:
+          type: string
+          format: uuid
+      - name: operationId
+        in: path
+        required: true
+        schema:
+          type: string
+          format: uuid
+      - name: X-Idempotency-Key
+        in: header
+        description: "Unique key for idempotent requests. If provided, ensures that\
+          \ identical requests with the same key will only be processed once."
+        required: false
+        schema:
+          type: string
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/UpdateOperationRequest"
+        required: true
+      responses:
+        "200":
+          description: OK
+          content:
+            '*/*':
+              schema:
+                $ref: "#/components/schemas/OperationDTO"
+    delete:
+      tags:
+      - Operations
+      summary: Delete operation
+      description: Delete an operation by ID
+      operationId: deleteOperation
+      parameters:
+      - name: distributorId
+        in: path
+        required: true
+        schema:
+          type: string
+          format: uuid
+      - name: operationId
+        in: path
+        required: true
+        schema:
+          type: string
+          format: uuid
+      - name: X-Idempotency-Key
+        in: header
+        description: "Unique key for idempotent requests. If provided, ensures that\
+          \ identical requests with the same key will only be processed once."
+        required: false
+        schema:
+          type: string
+      responses:
+        "200":
+          description: OK
+  /api/v1/experience/distributors/{distributorId}/configurations/{configId}:
+    put:
+      tags:
+      - Configurations
+      summary: Update configuration
+      description: Update an existing configuration
+      operationId: updateConfiguration
+      parameters:
+      - name: distributorId
+        in: path
+        required: true
+        schema:
+          type: string
+          format: uuid
+      - name: configId
+        in: path
+        required: true
+        schema:
+          type: string
+          format: uuid
+      - name: X-Idempotency-Key
+        in: header
+        description: "Unique key for idempotent requests. If provided, ensures that\
+          \ identical requests with the same key will only be processed once."
+        required: false
+        schema:
+          type: string
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/UpdateConfigurationRequest"
+        required: true
+      responses:
+        "200":
+          description: OK
+          content:
+            '*/*':
+              schema:
+                $ref: "#/components/schemas/ConfigurationDTO"
+    delete:
+      tags:
+      - Configurations
+      summary: Delete configuration
+      description: Delete a configuration by ID
+      operationId: deleteConfiguration
+      parameters:
+      - name: distributorId
+        in: path
+        required: true
+        schema:
+          type: string
+          format: uuid
+      - name: configId
+        in: path
+        required: true
+        schema:
+          type: string
+          format: uuid
+      - name: X-Idempotency-Key
+        in: header
+        description: "Unique key for idempotent requests. If provided, ensures that\
+          \ identical requests with the same key will only be processed once."
+        required: false
+        schema:
+          type: string
+      responses:
+        "200":
+          description: OK
+  /api/v1/experience/distributors/{distributorId}/catalog/{catalogItemId}:
+    get:
+      tags:
+      - Catalog
+      summary: Get catalog item
+      description: Retrieve a specific catalog item by ID
+      operationId: getCatalogItem
+      parameters:
+      - name: distributorId
+        in: path
+        required: true
+        schema:
+          type: string
+          format: uuid
+      - name: catalogItemId
+        in: path
+        required: true
+        schema:
+          type: string
+          format: uuid
+      - name: X-Idempotency-Key
+        in: header
+        description: "Unique key for idempotent requests. If provided, ensures that\
+          \ identical requests with the same key will only be processed once."
+        required: false
+        schema:
+          type: string
+      responses:
+        "200":
+          description: OK
+          content:
+            '*/*':
+              schema:
+                $ref: "#/components/schemas/CatalogItemDTO"
+    put:
+      tags:
+      - Catalog
+      summary: Update catalog item
+      description: Update an existing catalog item
+      operationId: updateCatalogItem
+      parameters:
+      - name: distributorId
+        in: path
+        required: true
+        schema:
+          type: string
+          format: uuid
+      - name: catalogItemId
+        in: path
+        required: true
+        schema:
+          type: string
+          format: uuid
+      - name: X-Idempotency-Key
+        in: header
+        description: "Unique key for idempotent requests. If provided, ensures that\
+          \ identical requests with the same key will only be processed once."
+        required: false
+        schema:
+          type: string
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/UpdateCatalogItemRequest"
+        required: true
+      responses:
+        "200":
+          description: OK
+          content:
+            '*/*':
+              schema:
+                type: string
+                format: uuid
+    delete:
+      tags:
+      - Catalog
+      summary: Remove from catalog
+      description: Remove an item from the distributor's catalog
+      operationId: removeFromCatalog
+      parameters:
+      - name: distributorId
+        in: path
+        required: true
+        schema:
+          type: string
+          format: uuid
+      - name: catalogItemId
+        in: path
+        required: true
+        schema:
+          type: string
+          format: uuid
+      - name: X-Idempotency-Key
+        in: header
+        description: "Unique key for idempotent requests. If provided, ensures that\
+          \ identical requests with the same key will only be processed once."
+        required: false
+        schema:
+          type: string
+      responses:
+        "200":
+          description: OK
+  /api/v1/experience/distributors/{distributorId}/brandings/{brandingId}/set-default:
+    put:
+      tags:
+      - Branding
+      summary: Set default branding
+      description: Mark a branding configuration as the default for the distributor
+      operationId: setDefaultBranding
+      parameters:
+      - name: distributorId
+        in: path
+        required: true
+        schema:
+          type: string
+          format: uuid
+      - name: brandingId
+        in: path
+        required: true
+        schema:
+          type: string
+          format: uuid
+      - name: X-Idempotency-Key
+        in: header
+        description: "Unique key for idempotent requests. If provided, ensures that\
+          \ identical requests with the same key will only be processed once."
+        required: false
+        schema:
+          type: string
+      responses:
+        "200":
+          description: OK
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/BrandingDTO"
+  /api/v1/experience/distributors/{distributorId}/brandings/{brandingId}:
+    get:
+      tags:
+      - Branding
+      summary: Get branding
+      description: Retrieve a branding configuration by ID
+      operationId: getBranding
+      parameters:
+      - name: distributorId
+        in: path
+        required: true
+        schema:
+          type: string
+          format: uuid
+      - name: brandingId
+        in: path
+        required: true
+        schema:
+          type: string
+          format: uuid
+      - name: X-Idempotency-Key
+        in: header
+        description: "Unique key for idempotent requests. If provided, ensures that\
+          \ identical requests with the same key will only be processed once."
+        required: false
+        schema:
+          type: string
+      responses:
+        "200":
+          description: OK
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/BrandingDTO"
+    put:
+      tags:
+      - Branding
+      summary: Update branding
+      description: Update an existing branding configuration
+      operationId: updateBranding
+      parameters:
+      - name: distributorId
+        in: path
+        required: true
+        schema:
+          type: string
+          format: uuid
+      - name: brandingId
+        in: path
+        required: true
+        schema:
+          type: string
+          format: uuid
+      - name: X-Idempotency-Key
+        in: header
+        description: "Unique key for idempotent requests. If provided, ensures that\
+          \ identical requests with the same key will only be processed once."
+        required: false
+        schema:
+          type: string
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/UpdateBrandingRequest"
+        required: true
+      responses:
+        "200":
+          description: OK
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/BrandingDTO"
+    delete:
+      tags:
+      - Branding
+      summary: Delete branding
+      description: Delete a branding configuration by ID
+      operationId: deleteBranding
+      parameters:
+      - name: distributorId
+        in: path
+        required: true
+        schema:
+          type: string
+          format: uuid
+      - name: brandingId
+        in: path
+        required: true
+        schema:
+          type: string
+          format: uuid
+      - name: X-Idempotency-Key
+        in: header
+        description: "Unique key for idempotent requests. If provided, ensures that\
+          \ identical requests with the same key will only be processed once."
+        required: false
+        schema:
+          type: string
+      responses:
+        "200":
+          description: OK
+  /api/v1/experience/distributors/{distributorId}/agents/{agentId}:
+    get:
+      tags:
+      - Agents
+      summary: Get agent
+      description: Retrieve a single agent by its identifier
+      operationId: getAgent
+      parameters:
+      - name: distributorId
+        in: path
+        required: true
+        schema:
+          type: string
+          format: uuid
+      - name: agentId
+        in: path
+        required: true
+        schema:
+          type: string
+          format: uuid
+      - name: X-Idempotency-Key
+        in: header
+        description: "Unique key for idempotent requests. If provided, ensures that\
+          \ identical requests with the same key will only be processed once."
+        required: false
+        schema:
+          type: string
+      responses:
+        "200":
+          description: OK
+          content:
+            '*/*':
+              schema:
+                $ref: "#/components/schemas/AgentDTO"
+    put:
+      tags:
+      - Agents
+      summary: Update agent
+      description: Update an existing agent
+      operationId: updateAgent
+      parameters:
+      - name: distributorId
+        in: path
+        required: true
+        schema:
+          type: string
+          format: uuid
+      - name: agentId
+        in: path
+        required: true
+        schema:
+          type: string
+          format: uuid
+      - name: X-Idempotency-Key
+        in: header
+        description: "Unique key for idempotent requests. If provided, ensures that\
+          \ identical requests with the same key will only be processed once."
+        required: false
+        schema:
+          type: string
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/UpdateAgentRequest"
+        required: true
+      responses:
+        "200":
+          description: OK
+          content:
+            '*/*':
+              schema:
+                $ref: "#/components/schemas/AgentDTO"
+    delete:
+      tags:
+      - Agents
+      summary: Delete agent
+      description: Delete an agent from a distributor
+      operationId: deleteAgent
+      parameters:
+      - name: distributorId
+        in: path
+        required: true
+        schema:
+          type: string
+          format: uuid
+      - name: agentId
+        in: path
+        required: true
+        schema:
+          type: string
+          format: uuid
+      - name: X-Idempotency-Key
+        in: header
+        description: "Unique key for idempotent requests. If provided, ensures that\
+          \ identical requests with the same key will only be processed once."
+        required: false
+        schema:
+          type: string
+      responses:
+        "200":
+          description: OK
+  /api/v1/experience/distributors/{distributorId}/agencies/{agencyId}:
+    get:
+      tags:
+      - Agencies
+      summary: Get agency
+      description: Retrieve a single agency by its identifier
+      operationId: getAgency
+      parameters:
+      - name: distributorId
+        in: path
+        required: true
+        schema:
+          type: string
+          format: uuid
+      - name: agencyId
+        in: path
+        required: true
+        schema:
+          type: string
+          format: uuid
+      - name: X-Idempotency-Key
+        in: header
+        description: "Unique key for idempotent requests. If provided, ensures that\
+          \ identical requests with the same key will only be processed once."
+        required: false
+        schema:
+          type: string
+      responses:
+        "200":
+          description: OK
+          content:
+            '*/*':
+              schema:
+                $ref: "#/components/schemas/AgencyDTO"
+    put:
+      tags:
+      - Agencies
+      summary: Update agency
+      description: Update an existing agency
+      operationId: updateAgency
+      parameters:
+      - name: distributorId
+        in: path
+        required: true
+        schema:
+          type: string
+          format: uuid
+      - name: agencyId
+        in: path
+        required: true
+        schema:
+          type: string
+          format: uuid
+      - name: X-Idempotency-Key
+        in: header
+        description: "Unique key for idempotent requests. If provided, ensures that\
+          \ identical requests with the same key will only be processed once."
+        required: false
+        schema:
+          type: string
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/UpdateAgencyRequest"
+        required: true
+      responses:
+        "200":
+          description: OK
+          content:
+            '*/*':
+              schema:
+                type: string
+                format: uuid
+    delete:
+      tags:
+      - Agencies
+      summary: Delete agency
+      description: Delete an agency from a distributor
+      operationId: deleteAgency
+      parameters:
+      - name: distributorId
+        in: path
+        required: true
+        schema:
+          type: string
+          format: uuid
+      - name: agencyId
+        in: path
+        required: true
+        schema:
+          type: string
+          format: uuid
+      - name: X-Idempotency-Key
+        in: header
+        description: "Unique key for idempotent requests. If provided, ensures that\
+          \ identical requests with the same key will only be processed once."
+        required: false
+        schema:
+          type: string
+      responses:
+        "200":
+          description: OK
+  /api/v1/experience/distributors/{distributorId}:
+    get:
+      tags:
+      - Distributor Profile
+      summary: Get distributor detail
+      description: "Retrieve composite distributor detail: profile + active branding\
+        \ + T&C status"
+      operationId: getDistributorDetail
+      parameters:
+      - name: distributorId
+        in: path
+        required: true
+        schema:
+          type: string
+          format: uuid
+      - name: X-Idempotency-Key
+        in: header
+        description: "Unique key for idempotent requests. If provided, ensures that\
+          \ identical requests with the same key will only be processed once."
+        required: false
+        schema:
+          type: string
+      responses:
+        "200":
+          description: OK
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/DistributorDetailDTO"
+    put:
+      tags:
+      - Distributor Profile
+      summary: Update distributor
+      description: Update the distributor profile and return the refreshed composite
+        view
+      operationId: updateDistributor
+      parameters:
+      - name: distributorId
+        in: path
+        required: true
+        schema:
+          type: string
+          format: uuid
+      - name: X-Idempotency-Key
+        in: header
+        description: "Unique key for idempotent requests. If provided, ensures that\
+          \ identical requests with the same key will only be processed once."
+        required: false
+        schema:
+          type: string
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/UpdateDistributorRequest"
+        required: true
+      responses:
+        "200":
+          description: OK
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/DistributorDetailDTO"
+    delete:
+      tags:
+      - Distributor Profile
+      summary: Delete distributor
+      description: Delete a distributor by ID
+      operationId: deleteDistributor
+      parameters:
+      - name: distributorId
+        in: path
+        required: true
+        schema:
+          type: string
+          format: uuid
+      - name: X-Idempotency-Key
+        in: header
+        description: "Unique key for idempotent requests. If provided, ensures that\
+          \ identical requests with the same key will only be processed once."
+        required: false
+        schema:
+          type: string
+      responses:
+        "200":
+          description: OK
+  /api/v1/experience/distributors/{distributorId}/territories:
+    get:
+      tags:
+      - Territories
+      summary: List territories
+      description: List all authorized territories for a distributor
+      operationId: listTerritories
+      parameters:
+      - name: distributorId
+        in: path
+        required: true
+        schema:
+          type: string
+          format: uuid
+      - name: X-Idempotency-Key
+        in: header
+        description: "Unique key for idempotent requests. If provided, ensures that\
+          \ identical requests with the same key will only be processed once."
+        required: false
+        schema:
+          type: string
+      responses:
+        "200":
+          description: OK
+          content:
+            '*/*':
+              schema:
+                $ref: "#/components/schemas/PaginationResponse"
+    post:
+      tags:
+      - Territories
+      summary: Create territory
+      description: Create a new authorized territory for a distributor
+      operationId: createTerritory
+      parameters:
+      - name: distributorId
+        in: path
+        required: true
+        schema:
+          type: string
+          format: uuid
+      - name: X-Idempotency-Key
+        in: header
+        description: "Unique key for idempotent requests. If provided, ensures that\
+          \ identical requests with the same key will only be processed once."
+        required: false
+        schema:
+          type: string
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/CreateTerritoryRequest"
+        required: true
+      responses:
+        "200":
+          description: OK
+          content:
+            '*/*':
+              schema:
+                type: string
+                format: uuid
+  /api/v1/experience/distributors/{distributorId}/terms-and-conditions:
+    get:
+      tags:
+      - Terms and Conditions
+      summary: List terms and conditions
+      description: List all terms and conditions for a distributor
+      operationId: listTerms
+      parameters:
+      - name: distributorId
+        in: path
+        required: true
+        schema:
+          type: string
+          format: uuid
+      - name: X-Idempotency-Key
+        in: header
+        description: "Unique key for idempotent requests. If provided, ensures that\
+          \ identical requests with the same key will only be processed once."
+        required: false
+        schema:
+          type: string
+      responses:
+        "200":
+          description: OK
+          content:
+            '*/*':
+              schema:
+                type: array
+                items:
+                  $ref: "#/components/schemas/TermsDTO"
+    post:
+      tags:
+      - Terms and Conditions
+      summary: Create terms and conditions
+      description: Create new terms and conditions for a distributor
+      operationId: createTerms
+      parameters:
+      - name: distributorId
+        in: path
+        required: true
+        schema:
+          type: string
+          format: uuid
+      - name: X-Idempotency-Key
+        in: header
+        description: "Unique key for idempotent requests. If provided, ensures that\
+          \ identical requests with the same key will only be processed once."
+        required: false
+        schema:
+          type: string
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/CreateTermsRequest"
+        required: true
+      responses:
+        "200":
+          description: OK
+          content:
+            '*/*':
+              schema:
+                $ref: "#/components/schemas/TermsDTO"
+  /api/v1/experience/distributors/{distributorId}/simulations:
+    post:
+      tags:
+      - Simulations
+      summary: Create simulation
+      description: Create a new simulation for a distributor
+      operationId: createSimulation
+      parameters:
+      - name: distributorId
+        in: path
+        required: true
+        schema:
+          type: string
+          format: uuid
+      - name: X-Idempotency-Key
+        in: header
+        description: "Unique key for idempotent requests. If provided, ensures that\
+          \ identical requests with the same key will only be processed once."
+        required: false
+        schema:
+          type: string
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/CreateSimulationRequest"
+        required: true
+      responses:
+        "200":
+          description: OK
+          content:
+            '*/*':
+              schema:
+                type: string
+                format: uuid
+  /api/v1/experience/distributors/{distributorId}/shipments:
+    get:
+      tags:
+      - Shipments
+      summary: List shipments
+      description: "List all shipments for a distributor, aggregated across all catalog\
+        \ products."
+      operationId: listShipments
+      parameters:
+      - name: distributorId
+        in: path
+        required: true
+        schema:
+          type: string
+          format: uuid
+      - name: X-Idempotency-Key
+        in: header
+        description: "Unique key for idempotent requests. If provided, ensures that\
+          \ identical requests with the same key will only be processed once."
+        required: false
+        schema:
+          type: string
+      responses:
+        "200":
+          description: OK
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: "#/components/schemas/ShipmentDTO"
+    post:
+      tags:
+      - Shipments
+      summary: Register shipment
+      description: Register a new shipment for a distributor product.
+      operationId: registerShipment
+      parameters:
+      - name: distributorId
+        in: path
+        required: true
+        schema:
+          type: string
+          format: uuid
+      - name: X-Idempotency-Key
+        in: header
+        description: "Unique key for idempotent requests. If provided, ensures that\
+          \ identical requests with the same key will only be processed once."
+        required: false
+        schema:
+          type: string
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/RegisterShipmentRequest"
+        required: true
+      responses:
+        "200":
+          description: OK
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ShipmentDTO"
+  /api/v1/experience/distributors/{distributorId}/products:
+    get:
+      tags:
+      - Products
+      summary: List products
+      description: List all products for a distributor
+      operationId: listProducts
+      parameters:
+      - name: distributorId
+        in: path
+        required: true
+        schema:
+          type: string
+          format: uuid
+      - name: X-Idempotency-Key
+        in: header
+        description: "Unique key for idempotent requests. If provided, ensures that\
+          \ identical requests with the same key will only be processed once."
+        required: false
+        schema:
+          type: string
+      responses:
+        "200":
+          description: OK
+          content:
+            '*/*':
+              schema:
+                type: array
+                items:
+                  $ref: "#/components/schemas/ProductDetailDTO"
+    post:
+      tags:
+      - Products
+      summary: Register product
+      description: Register a new product for a distributor
+      operationId: registerProduct
+      parameters:
+      - name: distributorId
+        in: path
+        required: true
+        schema:
+          type: string
+          format: uuid
+      - name: X-Idempotency-Key
+        in: header
+        description: "Unique key for idempotent requests. If provided, ensures that\
+          \ identical requests with the same key will only be processed once."
+        required: false
+        schema:
+          type: string
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/RegisterProductRequest"
+        required: true
+      responses:
+        "200":
+          description: OK
+          content:
+            '*/*':
+              schema:
+                type: string
+                format: uuid
+  /api/v1/experience/distributors/{distributorId}/operations:
+    get:
+      tags:
+      - Operations
+      summary: List operations
+      description: List all operations for a distributor
+      operationId: listOperations
+      parameters:
+      - name: distributorId
+        in: path
+        required: true
+        schema:
+          type: string
+          format: uuid
+      - name: X-Idempotency-Key
+        in: header
+        description: "Unique key for idempotent requests. If provided, ensures that\
+          \ identical requests with the same key will only be processed once."
+        required: false
+        schema:
+          type: string
+      responses:
+        "200":
+          description: OK
+          content:
+            '*/*':
+              schema:
+                type: array
+                items:
+                  $ref: "#/components/schemas/OperationDTO"
+    post:
+      tags:
+      - Operations
+      summary: Create operation
+      description: Create a new operation for a distributor
+      operationId: createOperation
+      parameters:
+      - name: distributorId
+        in: path
+        required: true
+        schema:
+          type: string
+          format: uuid
+      - name: X-Idempotency-Key
+        in: header
+        description: "Unique key for idempotent requests. If provided, ensures that\
+          \ identical requests with the same key will only be processed once."
+        required: false
+        schema:
+          type: string
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/CreateOperationRequest"
+        required: true
+      responses:
+        "200":
+          description: OK
+          content:
+            '*/*':
+              schema:
+                $ref: "#/components/schemas/OperationDTO"
+  /api/v1/experience/distributors/{distributorId}/configurations:
+    get:
+      tags:
+      - Configurations
+      summary: List configurations
+      description: List all configurations for a distributor
+      operationId: listConfigurations
+      parameters:
+      - name: distributorId
+        in: path
+        required: true
+        schema:
+          type: string
+          format: uuid
+      - name: X-Idempotency-Key
+        in: header
+        description: "Unique key for idempotent requests. If provided, ensures that\
+          \ identical requests with the same key will only be processed once."
+        required: false
+        schema:
+          type: string
+      responses:
+        "200":
+          description: OK
+          content:
+            '*/*':
+              schema:
+                type: array
+                items:
+                  $ref: "#/components/schemas/ConfigurationDTO"
+    post:
+      tags:
+      - Configurations
+      summary: Create configuration
+      description: Create a new configuration for a distributor
+      operationId: createConfiguration
+      parameters:
+      - name: distributorId
+        in: path
+        required: true
+        schema:
+          type: string
+          format: uuid
+      - name: X-Idempotency-Key
+        in: header
+        description: "Unique key for idempotent requests. If provided, ensures that\
+          \ identical requests with the same key will only be processed once."
+        required: false
+        schema:
+          type: string
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/CreateConfigurationRequest"
+        required: true
+      responses:
+        "200":
+          description: OK
+          content:
+            '*/*':
+              schema:
+                $ref: "#/components/schemas/ConfigurationDTO"
+  /api/v1/experience/distributors/{distributorId}/catalog:
+    get:
+      tags:
+      - Catalog
+      summary: List catalog items
+      description: List all catalog items for a distributor
+      operationId: listCatalog
+      parameters:
+      - name: distributorId
+        in: path
+        required: true
+        schema:
+          type: string
+          format: uuid
+      - name: X-Idempotency-Key
+        in: header
+        description: "Unique key for idempotent requests. If provided, ensures that\
+          \ identical requests with the same key will only be processed once."
+        required: false
+        schema:
+          type: string
+      responses:
+        "200":
+          description: OK
+          content:
+            '*/*':
+              schema:
+                type: array
+                items:
+                  $ref: "#/components/schemas/CatalogItemDTO"
+    post:
+      tags:
+      - Catalog
+      summary: Add to catalog
+      description: Add a new item to the distributor's catalog
+      operationId: addToCatalog
+      parameters:
+      - name: distributorId
+        in: path
+        required: true
+        schema:
+          type: string
+          format: uuid
+      - name: X-Idempotency-Key
+        in: header
+        description: "Unique key for idempotent requests. If provided, ensures that\
+          \ identical requests with the same key will only be processed once."
+        required: false
+        schema:
+          type: string
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/AddCatalogItemRequest"
+        required: true
+      responses:
+        "200":
+          description: OK
+          content:
+            '*/*':
+              schema:
+                type: string
+                format: uuid
+  /api/v1/experience/distributors/{distributorId}/brandings:
+    get:
+      tags:
+      - Branding
+      summary: List brandings
+      description: List all branding configurations for a distributor
+      operationId: listBrandings
+      parameters:
+      - name: distributorId
+        in: path
+        required: true
+        schema:
+          type: string
+          format: uuid
+      - name: X-Idempotency-Key
+        in: header
+        description: "Unique key for idempotent requests. If provided, ensures that\
+          \ identical requests with the same key will only be processed once."
+        required: false
+        schema:
+          type: string
+      responses:
+        "200":
+          description: OK
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: "#/components/schemas/BrandingDTO"
+    post:
+      tags:
+      - Branding
+      summary: Create branding
+      description: Create a new branding configuration for a distributor
+      operationId: createBranding
+      parameters:
+      - name: distributorId
+        in: path
+        required: true
+        schema:
+          type: string
+          format: uuid
+      - name: X-Idempotency-Key
+        in: header
+        description: "Unique key for idempotent requests. If provided, ensures that\
+          \ identical requests with the same key will only be processed once."
+        required: false
+        schema:
+          type: string
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/CreateBrandingRequest"
+        required: true
+      responses:
+        "200":
+          description: OK
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/BrandingDTO"
+  /api/v1/experience/distributors/{distributorId}/agents:
+    get:
+      tags:
+      - Agents
+      summary: List agents
+      description: List all agents for a distributor
+      operationId: listAgents
+      parameters:
+      - name: distributorId
+        in: path
+        required: true
+        schema:
+          type: string
+          format: uuid
+      - name: X-Idempotency-Key
+        in: header
+        description: "Unique key for idempotent requests. If provided, ensures that\
+          \ identical requests with the same key will only be processed once."
+        required: false
+        schema:
+          type: string
+      responses:
+        "200":
+          description: OK
+          content:
+            '*/*':
+              schema:
+                type: array
+                items:
+                  $ref: "#/components/schemas/AgentDTO"
+    post:
+      tags:
+      - Agents
+      summary: Create agent
+      description: Create a new agent for a distributor
+      operationId: createAgent
+      parameters:
+      - name: distributorId
+        in: path
+        required: true
+        schema:
+          type: string
+          format: uuid
+      - name: X-Idempotency-Key
+        in: header
+        description: "Unique key for idempotent requests. If provided, ensures that\
+          \ identical requests with the same key will only be processed once."
+        required: false
+        schema:
+          type: string
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/CreateAgentRequest"
+        required: true
+      responses:
+        "200":
+          description: OK
+          content:
+            '*/*':
+              schema:
+                $ref: "#/components/schemas/AgentDTO"
+  /api/v1/experience/distributors/{distributorId}/agent-agencies:
+    get:
+      tags:
+      - Agent-Agency Assignments
+      summary: List assignments
+      description: List all agent-agency assignments for a distributor
+      operationId: listAssignments
+      parameters:
+      - name: distributorId
+        in: path
+        required: true
+        schema:
+          type: string
+          format: uuid
+      - name: X-Idempotency-Key
+        in: header
+        description: "Unique key for idempotent requests. If provided, ensures that\
+          \ identical requests with the same key will only be processed once."
+        required: false
+        schema:
+          type: string
+      responses:
+        "200":
+          description: OK
+          content:
+            '*/*':
+              schema:
+                type: array
+                items:
+                  $ref: "#/components/schemas/AgentAgencyDTO"
+    post:
+      tags:
+      - Agent-Agency Assignments
+      summary: Assign agent to agency
+      description: Create an agent-agency assignment for a distributor
+      operationId: assignAgentToAgency
+      parameters:
+      - name: distributorId
+        in: path
+        required: true
+        schema:
+          type: string
+          format: uuid
+      - name: X-Idempotency-Key
+        in: header
+        description: "Unique key for idempotent requests. If provided, ensures that\
+          \ identical requests with the same key will only be processed once."
+        required: false
+        schema:
+          type: string
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/AssignAgentRequest"
+        required: true
+      responses:
+        "200":
+          description: OK
+          content:
+            '*/*':
+              schema:
+                $ref: "#/components/schemas/AgentAgencyDTO"
+  /api/v1/experience/distributors/{distributorId}/agencies:
+    get:
+      tags:
+      - Agencies
+      summary: List agencies
+      description: List all agencies for a distributor
+      operationId: listAgencies
+      parameters:
+      - name: distributorId
+        in: path
+        required: true
+        schema:
+          type: string
+          format: uuid
+      - name: X-Idempotency-Key
+        in: header
+        description: "Unique key for idempotent requests. If provided, ensures that\
+          \ identical requests with the same key will only be processed once."
+        required: false
+        schema:
+          type: string
+      responses:
+        "200":
+          description: OK
+          content:
+            '*/*':
+              schema:
+                $ref: "#/components/schemas/PaginationResponse"
+    post:
+      tags:
+      - Agencies
+      summary: Create agency
+      description: Create a new agency for a distributor
+      operationId: createAgency
+      parameters:
+      - name: distributorId
+        in: path
+        required: true
+        schema:
+          type: string
+          format: uuid
+      - name: X-Idempotency-Key
+        in: header
+        description: "Unique key for idempotent requests. If provided, ensures that\
+          \ identical requests with the same key will only be processed once."
+        required: false
+        schema:
+          type: string
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/CreateAgencyRequest"
+        required: true
+      responses:
+        "200":
+          description: OK
+          content:
+            '*/*':
+              schema:
+                type: string
+                format: uuid
+  /api/v1/experience/distributors:
+    post:
+      tags:
+      - Distributor Profile
+      summary: Register distributor
+      description: Onboard a new distributor and return the composite profile view
+      operationId: registerDistributor
+      parameters:
+      - name: X-Idempotency-Key
+        in: header
+        description: "Unique key for idempotent requests. If provided, ensures that\
+          \ identical requests with the same key will only be processed once."
+        required: false
+        schema:
+          type: string
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/RegisterDistributorRequest"
+        required: true
+      responses:
+        "200":
+          description: OK
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/DistributorDetailDTO"
+  /api/v1/experience/distributors/{distributorId}/terms-and-conditions/{tcId}/sign:
+    patch:
+      tags:
+      - Terms and Conditions
+      summary: Sign terms and conditions
+      description: Sign terms and conditions for a distributor
+      operationId: signTerms
+      parameters:
+      - name: distributorId
+        in: path
+        required: true
+        schema:
+          type: string
+          format: uuid
+      - name: tcId
+        in: path
+        required: true
+        schema:
+          type: string
+          format: uuid
+      - name: X-Idempotency-Key
+        in: header
+        description: "Unique key for idempotent requests. If provided, ensures that\
+          \ identical requests with the same key will only be processed once."
+        required: false
+        schema:
+          type: string
+      responses:
+        "200":
+          description: OK
+          content:
+            '*/*':
+              schema:
+                $ref: "#/components/schemas/TermsDTO"
+  /api/v1/experience/distributors/{distributorId}/terms-and-conditions/{tcId}/deactivate:
+    patch:
+      tags:
+      - Terms and Conditions
+      summary: Deactivate terms and conditions
+      description: Deactivate terms and conditions for a distributor
+      operationId: deactivateTerms
+      parameters:
+      - name: distributorId
+        in: path
+        required: true
+        schema:
+          type: string
+          format: uuid
+      - name: tcId
+        in: path
+        required: true
+        schema:
+          type: string
+          format: uuid
+      - name: X-Idempotency-Key
+        in: header
+        description: "Unique key for idempotent requests. If provided, ensures that\
+          \ identical requests with the same key will only be processed once."
+        required: false
+        schema:
+          type: string
+      responses:
+        "200":
+          description: OK
+          content:
+            '*/*':
+              schema:
+                $ref: "#/components/schemas/TermsDTO"
+  /api/v1/experience/distributors/{distributorId}/terms-and-conditions/{tcId}/activate:
+    patch:
+      tags:
+      - Terms and Conditions
+      summary: Activate terms and conditions
+      description: Activate terms and conditions for a distributor
+      operationId: activateTerms
+      parameters:
+      - name: distributorId
+        in: path
+        required: true
+        schema:
+          type: string
+          format: uuid
+      - name: tcId
+        in: path
+        required: true
+        schema:
+          type: string
+          format: uuid
+      - name: X-Idempotency-Key
+        in: header
+        description: "Unique key for idempotent requests. If provided, ensures that\
+          \ identical requests with the same key will only be processed once."
+        required: false
+        schema:
+          type: string
+      responses:
+        "200":
+          description: OK
+          content:
+            '*/*':
+              schema:
+                $ref: "#/components/schemas/TermsDTO"
+  /api/v1/experience/distributors/{distributorId}/operations/{operationId}/deactivate:
+    patch:
+      tags:
+      - Operations
+      summary: Deactivate operation
+      description: Deactivate an operation for a distributor
+      operationId: deactivateOperation
+      parameters:
+      - name: distributorId
+        in: path
+        required: true
+        schema:
+          type: string
+          format: uuid
+      - name: operationId
+        in: path
+        required: true
+        schema:
+          type: string
+          format: uuid
+      - name: X-Idempotency-Key
+        in: header
+        description: "Unique key for idempotent requests. If provided, ensures that\
+          \ identical requests with the same key will only be processed once."
+        required: false
+        schema:
+          type: string
+      responses:
+        "200":
+          description: OK
+          content:
+            '*/*':
+              schema:
+                $ref: "#/components/schemas/OperationDTO"
+  /api/v1/experience/distributors/{distributorId}/operations/{operationId}/activate:
+    patch:
+      tags:
+      - Operations
+      summary: Activate operation
+      description: Activate an operation for a distributor
+      operationId: activateOperation
+      parameters:
+      - name: distributorId
+        in: path
+        required: true
+        schema:
+          type: string
+          format: uuid
+      - name: operationId
+        in: path
+        required: true
+        schema:
+          type: string
+          format: uuid
+      - name: X-Idempotency-Key
+        in: header
+        description: "Unique key for idempotent requests. If provided, ensures that\
+          \ identical requests with the same key will only be processed once."
+        required: false
+        schema:
+          type: string
+      responses:
+        "200":
+          description: OK
+          content:
+            '*/*':
+              schema:
+                $ref: "#/components/schemas/OperationDTO"
+  /api/v1/experience/distributors/{distributorId}/terms-and-conditions/latest:
+    get:
+      tags:
+      - Terms and Conditions
+      summary: Get latest terms
+      description: Get the latest terms and conditions for a distributor
+      operationId: getLatestTerms
+      parameters:
+      - name: distributorId
+        in: path
+        required: true
+        schema:
+          type: string
+          format: uuid
+      - name: X-Idempotency-Key
+        in: header
+        description: "Unique key for idempotent requests. If provided, ensures that\
+          \ identical requests with the same key will only be processed once."
+        required: false
+        schema:
+          type: string
+      responses:
+        "200":
+          description: OK
+          content:
+            '*/*':
+              schema:
+                $ref: "#/components/schemas/TermsDTO"
+  /api/v1/experience/distributors/{distributorId}/terms-and-conditions/has-active-signed:
+    get:
+      tags:
+      - Terms and Conditions
+      summary: Check active signed terms
+      description: Check if the distributor has active signed terms and conditions
+      operationId: hasActiveSignedTerms
+      parameters:
+      - name: distributorId
+        in: path
+        required: true
+        schema:
+          type: string
+          format: uuid
+      - name: X-Idempotency-Key
+        in: header
+        description: "Unique key for idempotent requests. If provided, ensures that\
+          \ identical requests with the same key will only be processed once."
+        required: false
+        schema:
+          type: string
+      responses:
+        "200":
+          description: OK
+          content:
+            '*/*':
+              schema:
+                type: boolean
+  /api/v1/experience/distributors/{distributorId}/terms-and-conditions/active:
+    get:
+      tags:
+      - Terms and Conditions
+      summary: Get active terms
+      description: Get all active terms and conditions for a distributor
+      operationId: getActiveTerms
+      parameters:
+      - name: distributorId
+        in: path
+        required: true
+        schema:
+          type: string
+          format: uuid
+      - name: X-Idempotency-Key
+        in: header
+        description: "Unique key for idempotent requests. If provided, ensures that\
+          \ identical requests with the same key will only be processed once."
+        required: false
+        schema:
+          type: string
+      responses:
+        "200":
+          description: OK
+          content:
+            '*/*':
+              schema:
+                type: array
+                items:
+                  $ref: "#/components/schemas/TermsDTO"
+  /api/v1/experience/distributors/{distributorId}/simulations/{simulationId}:
+    get:
+      tags:
+      - Simulations
+      summary: Get simulation
+      description: Get a simulation result by ID
+      operationId: getSimulation
+      parameters:
+      - name: distributorId
+        in: path
+        required: true
+        schema:
+          type: string
+          format: uuid
+      - name: simulationId
+        in: path
+        required: true
+        schema:
+          type: string
+          format: uuid
+      - name: X-Idempotency-Key
+        in: header
+        description: "Unique key for idempotent requests. If provided, ensures that\
+          \ identical requests with the same key will only be processed once."
+        required: false
+        schema:
+          type: string
+      responses:
+        "200":
+          description: OK
+          content:
+            '*/*':
+              schema:
+                $ref: "#/components/schemas/SimulationResultDTO"
+  /api/v1/experience/distributors/{distributorId}/shipments/{shipmentId}/tracking:
+    get:
+      tags:
+      - Shipments
+      summary: Get shipment tracking
+      description: Retrieve real-time tracking information for a shipment.
+      operationId: getTracking
+      parameters:
+      - name: distributorId
+        in: path
+        required: true
+        schema:
+          type: string
+          format: uuid
+      - name: shipmentId
+        in: path
+        required: true
+        schema:
+          type: string
+          format: uuid
+      - name: X-Idempotency-Key
+        in: header
+        description: "Unique key for idempotent requests. If provided, ensures that\
+          \ identical requests with the same key will only be processed once."
+        required: false
+        schema:
+          type: string
+      responses:
+        "200":
+          description: OK
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ShipmentTrackingDTO"
+  /api/v1/experience/distributors/{distributorId}/products/active:
+    get:
+      tags:
+      - Products
+      summary: List active products
+      description: List all active products for a distributor
+      operationId: listActiveProducts
+      parameters:
+      - name: distributorId
+        in: path
+        required: true
+        schema:
+          type: string
+          format: uuid
+      - name: X-Idempotency-Key
+        in: header
+        description: "Unique key for idempotent requests. If provided, ensures that\
+          \ identical requests with the same key will only be processed once."
+        required: false
+        schema:
+          type: string
+      responses:
+        "200":
+          description: OK
+          content:
+            '*/*':
+              schema:
+                type: array
+                items:
+                  $ref: "#/components/schemas/ProductDetailDTO"
+  /api/v1/experience/distributors/{distributorId}/operations/can-operate:
+    get:
+      tags:
+      - Operations
+      summary: Check can operate
+      description: Check if the distributor can operate
+      operationId: canOperate
+      parameters:
+      - name: distributorId
+        in: path
+        required: true
+        schema:
+          type: string
+          format: uuid
+      - name: X-Idempotency-Key
+        in: header
+        description: "Unique key for idempotent requests. If provided, ensures that\
+          \ identical requests with the same key will only be processed once."
+        required: false
+        schema:
+          type: string
+      responses:
+        "200":
+          description: OK
+          content:
+            '*/*':
+              schema:
+                type: boolean
+  /api/v1/experience/distributors/{distributorId}/agent-agencies/{relationshipId}:
+    delete:
+      tags:
+      - Agent-Agency Assignments
+      summary: Unassign agent
+      description: Remove an agent-agency assignment from a distributor
+      operationId: unassignAgent
+      parameters:
+      - name: distributorId
+        in: path
+        required: true
+        schema:
+          type: string
+          format: uuid
+      - name: relationshipId
+        in: path
+        required: true
+        schema:
+          type: string
+          format: uuid
+      - name: X-Idempotency-Key
+        in: header
+        description: "Unique key for idempotent requests. If provided, ensures that\
+          \ identical requests with the same key will only be processed once."
+        required: false
+        schema:
+          type: string
+      responses:
+        "200":
+          description: OK
+components:
+  schemas:
+    UpdateTerritoryRequest:
+      type: object
+      properties:
+        countryId:
+          type: string
+          format: uuid
+        authorizationLevel:
+          type: string
+        isActive:
+          type: boolean
+        authorizedFrom:
+          type: string
+          format: date-time
+        authorizedUntil:
+          type: string
+          format: date-time
+    UpdateTermsRequest:
+      type: object
+      properties:
+        title:
+          type: string
+        content:
+          type: string
+        version:
+          type: string
+    TermsDTO:
+      type: object
+      properties:
+        id:
+          type: string
+          format: uuid
+        distributorId:
+          type: string
+          format: uuid
+        title:
+          type: string
+        content:
+          type: string
+        version:
+          type: string
+        status:
+          type: string
+        effectiveDate:
+          type: string
+          format: date-time
+        expirationDate:
+          type: string
+          format: date-time
+        signedDate:
+          type: string
+          format: date-time
+        isActive:
+          type: boolean
+    UpdateStatusRequest:
+      required:
+      - status
+      type: object
+      properties:
+        status:
+          minLength: 1
+          type: string
+        notes:
+          type: string
+    ShipmentDTO:
+      type: object
+      properties:
+        id:
+          type: string
+          format: uuid
+        distributorId:
+          type: string
+          format: uuid
+        productId:
+          type: string
+          format: uuid
+        trackingNumber:
+          type: string
+        carrier:
+          type: string
+        status:
+          type: string
+        estimatedDelivery:
+          type: string
+          format: date-time
+    UpdateShipmentRequest:
+      type: object
+      properties:
+        trackingNumber:
+          type: string
+        carrier:
+          type: string
+        shippingAddress:
+          type: string
+        status:
+          type: string
+        estimatedDelivery:
+          type: string
+          format: date-time
+    UpdateProductRequest:
+      type: object
+      properties:
+        name:
+          type: string
+        description:
+          type: string
+        category:
+          type: string
+        status:
+          type: string
+        isActive:
+          type: boolean
+    UpdateOperationRequest:
+      type: object
+      properties:
+        countryId:
+          type: string
+          format: uuid
+        administrativeDivisionId:
+          type: string
+          format: uuid
+        managedByAgentId:
+          type: string
+          format: uuid
+        agencyId:
+          type: string
+          format: uuid
+    OperationDTO:
+      type: object
+      properties:
+        id:
+          type: string
+          format: uuid
+        distributorId:
+          type: string
+          format: uuid
+        countryId:
+          type: string
+          format: uuid
+        administrativeDivisionId:
+          type: string
+          format: uuid
+        isActive:
+          type: boolean
+        managedByAgentId:
+          type: string
+          format: uuid
+        agencyId:
+          type: string
+          format: uuid
+    UpdateConfigurationRequest:
+      type: object
+      properties:
+        configKey:
+          type: string
+        configValue:
+          type: string
+        category:
+          type: string
+        description:
+          type: string
+    ConfigurationDTO:
+      type: object
+      properties:
+        id:
+          type: string
+          format: uuid
+        distributorId:
+          type: string
+          format: uuid
+        configKey:
+          type: string
+        configValue:
+          type: string
+        category:
+          type: string
+        description:
+          type: string
+        isActive:
+          type: boolean
+    UpdateCatalogItemRequest:
+      type: object
+      properties:
+        productName:
+          type: string
+        status:
+          type: string
+        isActive:
+          type: boolean
+    BrandingDTO:
+      type: object
+      properties:
+        id:
+          type: string
+          format: uuid
+        distributorId:
+          type: string
+          format: uuid
+        logoUrl:
+          type: string
+        primaryColor:
+          type: string
+        secondaryColor:
+          type: string
+        fontFamily:
+          type: string
+        theme:
+          type: string
+        isDefault:
+          type: boolean
+    UpdateBrandingRequest:
+      type: object
+      properties:
+        logoUrl:
+          type: string
+        primaryColor:
+          type: string
+        secondaryColor:
+          type: string
+        fontFamily:
+          type: string
+        theme:
+          type: string
+    UpdateAgentRequest:
+      type: object
+      properties:
+        firstName:
+          type: string
+        lastName:
+          type: string
+        email:
+          type: string
+        employeeCode:
+          type: string
+        isActive:
+          type: boolean
+    AgentDTO:
+      type: object
+      properties:
+        id:
+          type: string
+          format: uuid
+        distributorId:
+          type: string
+          format: uuid
+        firstName:
+          type: string
+        lastName:
+          type: string
+        email:
+          type: string
+        employeeCode:
+          type: string
+        isActive:
+          type: boolean
+    UpdateAgencyRequest:
+      type: object
+      properties:
+        name:
+          type: string
+        code:
+          type: string
+        city:
+          type: string
+        state:
+          type: string
+        isActive:
+          type: boolean
+        isHeadquarters:
+          type: boolean
+    UpdateDistributorRequest:
+      required:
+      - displayName
+      - email
+      - name
+      type: object
+      properties:
+        name:
+          minLength: 1
+          type: string
+        displayName:
+          minLength: 1
+          type: string
+        email:
+          minLength: 1
+          type: string
+        phoneNumber:
+          type: string
+        taxId:
+          type: string
+    DistributorDetailDTO:
+      type: object
+      properties:
+        id:
+          type: string
+          format: uuid
+        name:
+          type: string
+        displayName:
+          type: string
+        email:
+          type: string
+        status:
+          type: string
+        activeBranding:
+          $ref: "#/components/schemas/BrandingDTO"
+        hasActiveSignedTerms:
+          type: boolean
+    CreateTerritoryRequest:
+      required:
+      - countryId
+      type: object
+      properties:
+        countryId:
+          type: string
+          format: uuid
+        authorizationLevel:
+          type: string
+        isActive:
+          type: boolean
+        authorizedFrom:
+          type: string
+          format: date-time
+        authorizedUntil:
+          type: string
+          format: date-time
+    CreateTermsRequest:
+      type: object
+      properties:
+        title:
+          type: string
+        content:
+          type: string
+        version:
+          type: string
+        effectiveDate:
+          type: string
+          format: date-time
+    CreateSimulationRequest:
+      type: object
+      properties:
+        applicationId:
+          type: string
+          format: uuid
+        agentId:
+          type: string
+          format: uuid
+        agencyId:
+          type: string
+          format: uuid
+        notes:
+          type: string
+    RegisterShipmentRequest:
+      required:
+      - productId
+      type: object
+      properties:
+        productId:
+          type: string
+          format: uuid
+        trackingNumber:
+          type: string
+        carrier:
+          type: string
+        shippingAddress:
+          type: string
+        estimatedDelivery:
+          type: string
+          format: date-time
+    RegisterProductRequest:
+      required:
+      - category
+      - name
+      type: object
+      properties:
+        name:
+          minLength: 1
+          type: string
+        description:
+          type: string
+        category:
+          minLength: 1
+          type: string
+        status:
+          type: string
+    CreateOperationRequest:
+      type: object
+      properties:
+        countryId:
+          type: string
+          format: uuid
+        administrativeDivisionId:
+          type: string
+          format: uuid
+        managedByAgentId:
+          type: string
+          format: uuid
+        agencyId:
+          type: string
+          format: uuid
+    CreateConfigurationRequest:
+      type: object
+      properties:
+        configKey:
+          type: string
+        configValue:
+          type: string
+        category:
+          type: string
+        description:
+          type: string
+    AddCatalogItemRequest:
+      required:
+      - productId
+      type: object
+      properties:
+        productId:
+          type: string
+          format: uuid
+        productName:
+          type: string
+        status:
+          type: string
+    CreateBrandingRequest:
+      type: object
+      properties:
+        logoUrl:
+          type: string
+        primaryColor:
+          type: string
+        secondaryColor:
+          type: string
+        fontFamily:
+          type: string
+        theme:
+          type: string
+    CreateAgentRequest:
+      required:
+      - email
+      - firstName
+      - lastName
+      type: object
+      properties:
+        firstName:
+          minLength: 1
+          type: string
+        lastName:
+          minLength: 1
+          type: string
+        email:
+          minLength: 1
+          type: string
+        employeeCode:
+          type: string
+        isActive:
+          type: boolean
+    AssignAgentRequest:
+      required:
+      - agencyId
+      - agentId
+      type: object
+      properties:
+        agentId:
+          type: string
+          format: uuid
+        agencyId:
+          type: string
+          format: uuid
+        roleId:
+          type: string
+          format: uuid
+        isPrimaryAgency:
+          type: boolean
+    AgentAgencyDTO:
+      type: object
+      properties:
+        id:
+          type: string
+          format: uuid
+        agentId:
+          type: string
+          format: uuid
+        agencyId:
+          type: string
+          format: uuid
+        roleId:
+          type: string
+          format: uuid
+        isPrimaryAgency:
+          type: boolean
+        isActive:
+          type: boolean
+    CreateAgencyRequest:
+      required:
+      - code
+      - name
+      type: object
+      properties:
+        name:
+          minLength: 1
+          type: string
+        code:
+          minLength: 1
+          type: string
+        city:
+          type: string
+        state:
+          type: string
+        isActive:
+          type: boolean
+        isHeadquarters:
+          type: boolean
+    RegisterDistributorRequest:
+      required:
+      - displayName
+      - email
+      - name
+      type: object
+      properties:
+        name:
+          minLength: 1
+          type: string
+        displayName:
+          minLength: 1
+          type: string
+        email:
+          minLength: 1
+          type: string
+        phoneNumber:
+          type: string
+        taxId:
+          type: string
+    PaginationResponse:
+      type: object
+      properties:
+        content:
+          type: array
+          items:
+            type: object
+        totalElements:
+          type: integer
+          format: int64
+        totalPages:
+          type: integer
+          format: int32
+        currentPage:
+          type: integer
+          format: int32
+    TerritoryDTO:
+      type: object
+      properties:
+        id:
+          type: string
+          format: uuid
+        distributorId:
+          type: string
+          format: uuid
+        countryId:
+          type: string
+          format: uuid
+        authorizationLevel:
+          type: string
+        isActive:
+          type: boolean
+        authorizedFrom:
+          type: string
+          format: date-time
+        authorizedUntil:
+          type: string
+          format: date-time
+    SimulationResultDTO:
+      type: object
+      properties:
+        id:
+          type: string
+          format: uuid
+        distributorId:
+          type: string
+          format: uuid
+        status:
+          type: string
+        createdAt:
+          type: string
+          format: date-time
+    ShipmentTrackingDTO:
+      type: object
+      properties:
+        shipmentId:
+          type: string
+          format: uuid
+        trackingNumber:
+          type: string
+        carrier:
+          type: string
+        currentStatus:
+          type: string
+        events:
+          type: array
+          items:
+            type: string
+    ProductDetailDTO:
+      type: object
+      properties:
+        id:
+          type: string
+          format: uuid
+        distributorId:
+          type: string
+          format: uuid
+        name:
+          type: string
+        description:
+          type: string
+        category:
+          type: string
+        status:
+          type: string
+        isActive:
+          type: boolean
+    CatalogItemDTO:
+      type: object
+      properties:
+        id:
+          type: string
+          format: uuid
+        distributorId:
+          type: string
+          format: uuid
+        productId:
+          type: string
+          format: uuid
+        productName:
+          type: string
+        status:
+          type: string
+        isActive:
+          type: boolean
+    AgencyDTO:
+      type: object
+      properties:
+        id:
+          type: string
+          format: uuid
+        distributorId:
+          type: string
+          format: uuid
+        name:
+          type: string
+        code:
+          type: string
+        city:
+          type: string
+        state:
+          type: string
+        isActive:
+          type: boolean
+        isHeadquarters:
+          type: boolean
