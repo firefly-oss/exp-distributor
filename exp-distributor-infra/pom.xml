@@ -10,6 +10,7 @@
     </parent>
 
     <artifactId>exp-distributor-infra</artifactId>
+    <name>exp-distributor-infra</name>
 
     <properties>
         <maven.compiler.source>25</maven.compiler.source>
