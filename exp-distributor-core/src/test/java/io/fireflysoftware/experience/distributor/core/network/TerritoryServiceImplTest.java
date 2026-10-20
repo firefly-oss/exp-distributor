@@ -1,0 +1,151 @@
+package io.fireflysoftware.experience.distributor.core.network;
+
+import io.fireflysoftware.domain.distributor.branding.sdk.api.TerritoryApi;
+import io.fireflysoftware.domain.distributor.branding.sdk.model.CreateTerritoryCommand;
+import io.fireflysoftware.domain.distributor.branding.sdk.model.DistributorAuthorizedTerritoryDTO;
+import io.fireflysoftware.domain.distributor.branding.sdk.model.PaginationResponse;
+import io.fireflysoftware.domain.distributor.branding.sdk.model.UpdateTerritoryCommand;
+import io.fireflysoftware.experience.distributor.core.mappers.TerritoryMapper;
+import io.fireflysoftware.experience.distributor.interfaces.dtos.CreateTerritoryRequest;
+import io.fireflysoftware.experience.distributor.interfaces.dtos.TerritoryDTO;
+import io.fireflysoftware.experience.distributor.interfaces.dtos.UpdateTerritoryRequest;
+import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.extension.ExtendWith;
+import org.mockito.InjectMocks;
+import org.mockito.Mock;
+import org.mockito.junit.jupiter.MockitoExtension;
+import reactor.core.publisher.Mono;
+import reactor.test.StepVerifier;
+
+import java.util.UUID;
+
+import static org.assertj.core.api.Assertions.assertThat;
+import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.ArgumentMatchers.eq;
+import static org.mockito.Mockito.verify;
+import static org.mockito.Mockito.when;
+
+@ExtendWith(MockitoExtension.class)
+class TerritoryServiceImplTest {
+
+    @Mock
+    private TerritoryApi territoryApi;
+
+    @Mock
+    private TerritoryMapper territoryMapper;
+
+    @InjectMocks
+    private TerritoryServiceImpl service;
+
+    private DistributorAuthorizedTerritoryDTO buildSdkTerritory(UUID distributorId, UUID territoryId) {
+        DistributorAuthorizedTerritoryDTO dto = new DistributorAuthorizedTerritoryDTO();
+        dto.setId(territoryId);
+        dto.setDistributorId(distributorId);
+        dto.setCountryId(UUID.randomUUID());
+        dto.setAuthorizationLevel(DistributorAuthorizedTerritoryDTO.AuthorizationLevelEnum.COUNTRY);
+        dto.setIsActive(true);
+        return dto;
+    }
+
+    private TerritoryDTO buildTerritoryDTO(UUID distributorId, UUID territoryId) {
+        return TerritoryDTO.builder()
+                .id(territoryId)
+                .distributorId(distributorId)
+                .authorizationLevel("COUNTRY")
+                .isActive(true)
+                .build();
+    }
+
+    @Test
+    void createTerritory_shouldMapRequestToCommandAndReturnId() {
+        UUID distributorId = UUID.randomUUID();
+        UUID territoryId = UUID.randomUUID();
+        CreateTerritoryRequest request = CreateTerritoryRequest.builder()
+                .countryId(UUID.randomUUID())
+                .authorizationLevel("COUNTRY")
+                .isActive(true)
+                .build();
+        CreateTerritoryCommand command = new CreateTerritoryCommand();
+
+        when(territoryMapper.toCreateCommand(request)).thenReturn(command);
+        when(territoryApi.createTerritory(eq(distributorId), eq(command), any())).thenReturn(Mono.just(territoryId));
+
+        StepVerifier.create(service.createTerritory(distributorId, request))
+                .assertNext(id -> assertThat(id).isEqualTo(territoryId))
+                .verifyComplete();
+
+        verify(territoryMapper).toCreateCommand(request);
+        verify(territoryApi).createTerritory(eq(distributorId), eq(command), any());
+    }
+
+    @Test
+    void getTerritory_shouldCallApiAndMapToDTO() {
+        UUID distributorId = UUID.randomUUID();
+        UUID territoryId = UUID.randomUUID();
+        DistributorAuthorizedTerritoryDTO sdkDto = buildSdkTerritory(distributorId, territoryId);
+        TerritoryDTO expected = buildTerritoryDTO(distributorId, territoryId);
+
+        when(territoryApi.getTerritory(eq(distributorId), eq(territoryId), any())).thenReturn(Mono.just(sdkDto));
+        when(territoryMapper.toDto(sdkDto)).thenReturn(expected);
+
+        StepVerifier.create(service.getTerritory(distributorId, territoryId))
+                .assertNext(dto -> {
+                    assertThat(dto.getId()).isEqualTo(territoryId);
+                    assertThat(dto.getDistributorId()).isEqualTo(distributorId);
+                    assertThat(dto.getAuthorizationLevel()).isEqualTo("COUNTRY");
+                })
+                .verifyComplete();
+
+        verify(territoryApi).getTerritory(eq(distributorId), eq(territoryId), any());
+        verify(territoryMapper).toDto(sdkDto);
+    }
+
+    @Test
+    void listTerritories_shouldDelegateToApiAndReturnPaginationResponse() {
+        UUID distributorId = UUID.randomUUID();
+        PaginationResponse response = new PaginationResponse();
+
+        when(territoryApi.listTerritories(eq(distributorId), any())).thenReturn(Mono.just(response));
+
+        StepVerifier.create(service.listTerritories(distributorId))
+                .assertNext(r -> assertThat(r).isSameAs(response))
+                .verifyComplete();
+
+        verify(territoryApi).listTerritories(eq(distributorId), any());
+    }
+
+    @Test
+    void updateTerritory_shouldMapRequestToCommandAndReturnId() {
+        UUID distributorId = UUID.randomUUID();
+        UUID territoryId = UUID.randomUUID();
+        UpdateTerritoryRequest request = UpdateTerritoryRequest.builder()
+                .authorizationLevel("REGION")
+                .isActive(false)
+                .build();
+        UpdateTerritoryCommand command = new UpdateTerritoryCommand();
+
+        when(territoryMapper.toUpdateCommand(request)).thenReturn(command);
+        when(territoryApi.updateTerritory(eq(distributorId), eq(territoryId), eq(command), any()))
+                .thenReturn(Mono.just(territoryId));
+
+        StepVerifier.create(service.updateTerritory(distributorId, territoryId, request))
+                .assertNext(id -> assertThat(id).isEqualTo(territoryId))
+                .verifyComplete();
+
+        verify(territoryMapper).toUpdateCommand(request);
+        verify(territoryApi).updateTerritory(eq(distributorId), eq(territoryId), eq(command), any());
+    }
+
+    @Test
+    void deleteTerritory_shouldDelegateToApiAndComplete() {
+        UUID distributorId = UUID.randomUUID();
+        UUID territoryId = UUID.randomUUID();
+
+        when(territoryApi.deleteTerritory(eq(distributorId), eq(territoryId), any())).thenReturn(Mono.empty());
+
+        StepVerifier.create(service.deleteTerritory(distributorId, territoryId))
+                .verifyComplete();
+
+        verify(territoryApi).deleteTerritory(eq(distributorId), eq(territoryId), any());
+    }
+}

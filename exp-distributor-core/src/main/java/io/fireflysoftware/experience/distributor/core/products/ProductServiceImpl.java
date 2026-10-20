@@ -1,0 +1,82 @@
+package io.fireflysoftware.experience.distributor.core.products;
+
+import io.fireflysoftware.domain.distributor.catalog.sdk.api.DistributorApi;
+import io.fireflysoftware.domain.distributor.catalog.sdk.model.RegisterProductCommand;
+import io.fireflysoftware.domain.distributor.catalog.sdk.model.UpdateProductCommand;
+import io.fireflysoftware.domain.distributor.catalog.sdk.model.UpdateProductInfoCommand;
+import io.fireflysoftware.domain.product.catalog.sdk.api.ProductsApi;
+import io.fireflysoftware.experience.distributor.interfaces.dtos.ProductDetailDTO;
+import io.fireflysoftware.experience.distributor.interfaces.dtos.RegisterProductRequest;
+import io.fireflysoftware.experience.distributor.interfaces.dtos.UpdateProductRequest;
+import io.fireflysoftware.experience.distributor.core.mappers.ProductMapper;
+import lombok.extern.slf4j.Slf4j;
+import org.springframework.beans.factory.annotation.Qualifier;
+import org.springframework.stereotype.Service;
+import reactor.core.publisher.Flux;
+import reactor.core.publisher.Mono;
+
+import java.util.UUID;
+
+@Service
+@Slf4j
+public class ProductServiceImpl implements ProductService {
+
+    private final DistributorApi catalogDistributorApi;
+    private final ProductsApi productsApi;
+    private final ProductMapper productMapper;
+
+    public ProductServiceImpl(@Qualifier("catalogDistributorApi") DistributorApi catalogDistributorApi,
+                              ProductsApi productsApi,
+                              ProductMapper productMapper) {
+        this.catalogDistributorApi = catalogDistributorApi;
+        this.productsApi = productsApi;
+        this.productMapper = productMapper;
+    }
+
+    @Override
+    public Flux<ProductDetailDTO> listProducts(UUID distributorId) {
+        log.info("Listing products for distributor: {}", distributorId);
+        return catalogDistributorApi.listCatalog(distributorId, null)
+                .map(productMapper::fromCatalogDto);
+    }
+
+    @Override
+    @SuppressWarnings("unchecked")
+    public Mono<UUID> registerProduct(UUID distributorId, RegisterProductRequest request) {
+        log.info("Registering product for distributor: {}", distributorId);
+        RegisterProductCommand cmd = new RegisterProductCommand();
+        return catalogDistributorApi.registerProduct(distributorId, cmd, UUID.randomUUID().toString())
+                .map(result -> (UUID) result);
+    }
+
+    @Override
+    public Mono<ProductDetailDTO> getProduct(UUID distributorId, UUID productId) {
+        log.info("Getting product {} for distributor: {}", productId, distributorId);
+        return productsApi.getProductInfo(productId, null)
+                .map(productMapper::toDto);
+    }
+
+    @Override
+    @SuppressWarnings("unchecked")
+    public Mono<UUID> updateProduct(UUID distributorId, UUID productId, UpdateProductRequest request) {
+        log.info("Updating product {} for distributor: {}", productId, distributorId);
+        UpdateProductCommand cmd = new UpdateProductCommand();
+        return catalogDistributorApi.reviseProduct(distributorId, productId, cmd, UUID.randomUUID().toString())
+                .map(result -> (UUID) result);
+    }
+
+    @Override
+    public Mono<Void> removeProduct(UUID distributorId, UUID productId) {
+        log.info("Removing product {} for distributor: {}", productId, distributorId);
+        UpdateProductInfoCommand cmd = new UpdateProductInfoCommand();
+        return catalogDistributorApi.retireProduct(distributorId, productId, cmd, UUID.randomUUID().toString()).then();
+    }
+
+    @Override
+    public Flux<ProductDetailDTO> listActiveProducts(UUID distributorId) {
+        log.info("Listing active products for distributor: {}", distributorId);
+        return catalogDistributorApi.listCatalog(distributorId, null)
+                .filter(p -> Boolean.TRUE.equals(p.getIsActive()))
+                .map(productMapper::fromCatalogDto);
+    }
+}

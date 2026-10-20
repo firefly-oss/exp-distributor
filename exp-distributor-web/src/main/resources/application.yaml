@@ -54,7 +54,7 @@ springdoc:
     operationsSorter: method
     docExpansion: none
     filter: true
-  packages-to-scan: com.firefly.experience.distributor.web.controllers
+  packages-to-scan: io.fireflysoftware.experience.distributor.web.controllers
   paths-to-match: /api/**
 
 management:
@@ -78,5 +78,5 @@ logging:
     console: "%d{yyyy-MM-dd HH:mm:ss} [%thread] %-5level %logger{36} - %msg%n"
   level:
     root: INFO
-    com.firefly.experience.distributor: DEBUG
+    io.fireflysoftware.experience.distributor: DEBUG
     org.fireflyframework: DEBUG
