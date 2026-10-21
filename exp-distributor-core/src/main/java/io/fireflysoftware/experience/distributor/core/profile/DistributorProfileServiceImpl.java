@@ -34,6 +34,7 @@ import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.stereotype.Service;
 import reactor.core.publisher.Mono;
 
+import java.util.Map;
 import java.util.UUID;
 
 /**
@@ -72,7 +73,7 @@ public class DistributorProfileServiceImpl implements DistributorProfileService 
 
         return brandingDistributorApi.onboardDistributor(sdkCommand, UUID.randomUUID().toString())
                 .map(result -> {
-                    UUID distributorId = (UUID) result;
+                    UUID distributorId = distributorId(result);
                     return DistributorDetailDTO.builder()
                             .id(distributorId)
                             .name(request.getName())
@@ -133,5 +134,24 @@ public class DistributorProfileServiceImpl implements DistributorProfileService 
     public Mono<Void> deleteDistributor(UUID distributorId) {
         return distributorQueryApi.deleteDistributor(distributorId, UUID.randomUUID().toString())
                 .doOnSuccess(v -> log.info("Deleted distributor: distributorId={}", distributorId));
+    }
+
+    private static UUID distributorId(Object result) {
+        if (result instanceof UUID id) {
+            return id;
+        }
+        if (result instanceof String text && !text.isBlank()) {
+            return UUID.fromString(text.replace("\"", ""));
+        }
+        if (result instanceof Map<?, ?> map) {
+            Object id = map.get("id");
+            if (id == null) {
+                id = map.get("distributorId");
+            }
+            if (id != null) {
+                return UUID.fromString(id.toString());
+            }
+        }
+        throw new IllegalStateException("Distributor registration did not return an id");
     }
 }
