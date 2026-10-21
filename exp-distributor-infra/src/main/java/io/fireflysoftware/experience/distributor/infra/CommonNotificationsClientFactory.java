@@ -17,7 +17,6 @@
 
 package io.fireflysoftware.experience.distributor.infra;
 
-import io.fireflysoftware.domain.common.notifications.sdk.api.NotificationPreferencesApi;
 import io.fireflysoftware.domain.common.notifications.sdk.api.NotificationsApi;
 import io.fireflysoftware.domain.common.notifications.sdk.invoker.ApiClient;
 import org.springframework.context.annotation.Bean;
@@ -50,15 +49,5 @@ public class CommonNotificationsClientFactory {
     @Bean
     public NotificationsApi notificationsApi() {
         return new NotificationsApi(apiClient);
-    }
-
-    /**
-     * Provides the {@link NotificationPreferencesApi} bean for managing notification preferences.
-     *
-     * @return a ready-to-use NotificationPreferencesApi instance
-     */
-    @Bean
-    public NotificationPreferencesApi notificationPreferencesApi() {
-        return new NotificationPreferencesApi(apiClient);
     }
 }
