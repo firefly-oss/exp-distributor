@@ -73,8 +73,14 @@ class DistributorProfileServiceImplTest {
                 .taxId("US-TAX-001")
                 .build();
 
+        DistributorDTO profile = new DistributorDTO();
+        profile.setName("Acme Corp");
+        profile.setDisplayName("Acme");
+        profile.setEmail("info@acme.com");
+        profile.setIsActive(true);
         when(brandingDistributorApi.onboardDistributor(any(RegisterDistributorCommand.class), any()))
                 .thenReturn(Mono.just(distributorId));
+        when(distributorQueryApi.getDistributorProfile(eq(distributorId), any())).thenReturn(Mono.just(profile));
 
         StepVerifier.create(service.registerDistributor(request))
                 .assertNext(dto -> {

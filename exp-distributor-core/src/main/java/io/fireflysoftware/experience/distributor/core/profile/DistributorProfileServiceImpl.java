@@ -72,16 +72,17 @@ public class DistributorProfileServiceImpl implements DistributorProfileService 
         sdkCommand.setDistributorInfo(infoCommand);
 
         return brandingDistributorApi.onboardDistributor(sdkCommand, UUID.randomUUID().toString())
-                .map(result -> {
+                .flatMap(result -> {
                     UUID distributorId = distributorId(result);
-                    return DistributorDetailDTO.builder()
-                            .id(distributorId)
-                            .name(request.getName())
-                            .displayName(request.getDisplayName())
-                            .email(request.getEmail())
-                            .status("ACTIVE")
-                            .hasActiveSignedTerms(false)
-                            .build();
+                    return distributorQueryApi.getDistributorProfile(distributorId, null)
+                            .map(profile -> DistributorDetailDTO.builder()
+                                    .id(distributorId)
+                                    .name(profile.getName())
+                                    .displayName(profile.getDisplayName())
+                                    .email(profile.getEmail())
+                                    .status(Boolean.TRUE.equals(profile.getIsActive()) ? "ACTIVE" : "INACTIVE")
+                                    .hasActiveSignedTerms(false)
+                                    .build());
                 })
                 .doOnNext(dto -> log.info("Registered distributor: distributorId={}", dto.getId()));
     }
